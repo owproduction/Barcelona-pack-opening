@@ -126,12 +126,31 @@ bool CheckGoalLineCrossing(const Circle& circle, const Goal& goal) {
 
     // Проверяем, пересек ли мяч линию ворот (с учетом радиуса)
     if (circle.position.y - circle.radius <= goalLineY) {
-        // Проверяем, пролетел ли мяч мимо ворот (не между штангами)
+        // Проверяем, пролетел ли мяч между штангами
         float leftPostX = goal.position.x - goal.width / 2;
         float rightPostX = goal.position.x + goal.width / 2;
 
         // Если мяч пересек линию и не попал между штангами
         if (circle.position.x < leftPostX || circle.position.x > rightPostX) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Функция для проверки гола (мяч пересек линию ворот между штангами)
+bool CheckGoalScored(const Circle& circle, const Goal& goal) {
+    // Высота линии ворот (уровень перекладины)
+    float goalLineY = goal.position.y - goal.height / 2;
+
+    // Проверяем, пересек ли мяч линию ворот (с учетом радиуса)
+    if (circle.position.y - circle.radius <= goalLineY) {
+        // Проверяем, пролетел ли мяч между штангами
+        float leftPostX = goal.position.x - goal.width / 2;
+        float rightPostX = goal.position.x + goal.width / 2;
+
+        // Если мяч пересек линию и попал между штангами
+        if (circle.position.x >= leftPostX && circle.position.x <= rightPostX) {
             return true;
         }
     }
@@ -244,6 +263,37 @@ void HandleWallCollision(Circle& circle) {
     }
 }
 
+// Функция для отрисовки шкалы силы
+void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDragging) {
+    if (isDragging) {
+        // Вычисляем расстояние между мячом и курсором
+        float distance = Vector2Distance(circle.position, mousePosition);
+
+        // Ограничиваем максимальную дистанцию для лучшего визуального отображения
+        float maxDistance = 150.0f;
+        float power = (distance > maxDistance) ? 1.0f : distance / maxDistance;
+
+        // Позиция шкалы (над мячом)
+        Vector2 barPosition = { circle.position.x - 50, circle.position.y - 40 };
+        float barWidth = 100.0f;
+        float barHeight = 10.0f;
+
+        // Рисуем фон шкалы
+        DrawRectangleRec({ barPosition.x, barPosition.y, barWidth, barHeight }, GRAY);
+
+        // Рисуем заполнение шкалы (красный цвет, пропорциональный силе)
+        DrawRectangleRec({ barPosition.x, barPosition.y, barWidth * power, barHeight }, RED);
+
+        // Рисуем контур шкалы
+        DrawRectangleLines(barPosition.x, barPosition.y, barWidth, barHeight, WHITE);
+
+        // Отображаем числовое значение силы (в процентах)
+        //char powerText[10];
+        //printf(powerText, "%.0f%%", power * 100);
+        //DrawText(powerText, barPosition.x + barWidth / 2 - 10, barPosition.y - 15, 10, WHITE);
+    }
+}
+
 int main()
 {
     InitWindow(MAX_WIDTH, MAX_HEIGHT, "Bounce with Goal");
@@ -251,6 +301,8 @@ int main()
 
     bool dragging = false;
     Circle* selectedCircle = nullptr;
+    Vector2 dragStartPosition;
+    int score = 0; // Счет голов
 
     std::vector<Circle> circles;
     GenerateCircles(circles, 1, 15.0f, 0, 0);
@@ -266,6 +318,7 @@ int main()
                 if (CheckCollisionPointCircle(mousePosition, circle.position, circle.radius)) {
                     dragging = true;
                     selectedCircle = &circle;
+                    dragStartPosition = mousePosition;
                     break;
                 }
             }
@@ -285,9 +338,19 @@ int main()
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             if (selectedCircle != nullptr) {
-                Vector2 direction = Vector2Subtract(mousePosition, selectedCircle->position);
+                // Вычисляем направление и силу удара
+                Vector2 direction = Vector2Subtract(selectedCircle->position, mousePosition);
                 float distance = Vector2Length(direction);
-                Vector2 acceleration = Vector2Negate(Vector2Scale(Vector2Normalize(direction), distance * 0.1f));
+
+                // Ограничиваем максимальную дистанцию для контроля силы
+                float maxDistance = 150.0f;
+                if (distance > maxDistance) {
+                    distance = maxDistance;
+                    direction = Vector2Scale(Vector2Normalize(direction), maxDistance);
+                }
+
+                // Применяем силу (чем дальше тянем, тем сильнее удар)
+                Vector2 acceleration = Vector2Scale(Vector2Normalize(direction), distance * 0.15f);
                 selectedCircle->velocity = acceleration;
             }
             dragging = false;
@@ -309,6 +372,12 @@ int main()
                 ResetCircle(circle);
             }
 
+            // Проверяем гол (мяч залетел в ворота)
+            if (CheckGoalScored(circle, goal)) {
+                score++; // Увеличиваем счет
+                ResetCircle(circle);
+            }
+
             // Обработка столкновений со стенами
             HandleWallCollision(circle);
 
@@ -320,7 +389,7 @@ int main()
         ClearBackground(DARKGREEN);
 
         // Рисуем линию ворот (по всей ширине экрана)
-        float goalLineY = goal.position.y + goal.height / 2;
+        float goalLineY = goal.position.y - goal.height / 2;
         DrawLine(0, goalLineY, MAX_WIDTH, goalLineY, WHITE);
 
         // Рисуем ворота
@@ -331,8 +400,22 @@ int main()
             DrawCircleV(circle.position, circle.radius, WHITE);
         }
 
+        // Рисуем шкалу силы, если перетаскиваем мяч
+        if (dragging && selectedCircle != nullptr) {
+            DrawPowerBar(*selectedCircle, mousePosition, dragging);
 
+            // Рисуем линию от мяча к курсору
+            DrawLineV(selectedCircle->position, mousePosition, RED);
+        }
+
+        // Отображаем счет
+        //char scoreText[20];
+        //printf(scoreText, "Score: %d", score);
+        //DrawText(scoreText, 10, 10, 20, WHITE);
 
         EndDrawing();
     }
+
+    CloseWindow();
+    return 0;
 }
