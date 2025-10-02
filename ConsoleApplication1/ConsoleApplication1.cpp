@@ -24,6 +24,7 @@ struct Circle {
     float radius;
     float weight;
     Vector2 startPosition; // Начальная позиция для возврата
+    Vector2 hitPosition;   // Позиция удара для возврата при промахе
 };
 
 // Функция для создания ворот
@@ -157,6 +158,49 @@ bool CheckGoalScored(const Circle& circle, const Goal& goal) {
     return false;
 }
 
+// Функция для проверки полного залета мяча в ворота
+bool CheckCompleteGoal(const Circle& circle, const Goal& goal) {
+    // Высота внутренней линии ворот (на уровне низа штанг)
+    float innerLineY = goal.position.y + goal.height / 2;
+
+    // Проверяем, пересек ли мяч внутреннюю линию ворот
+    if (circle.position.y - circle.radius <= innerLineY) {
+        // Проверяем, пролетел ли мяч между штангами
+        float leftPostX = goal.position.x - goal.width / 2;
+        float rightPostX = goal.position.x + goal.width / 2;
+
+        // Если мяч пересек внутреннюю линию и попал между штангами
+        if (circle.position.x >= leftPostX && circle.position.x <= rightPostX) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Функция для проверки касания ГОРИЗОНТАЛЬНЫХ белых линий СБОКУ ОТ ШТАНГ
+bool CheckSideLinesCollision(const Circle& circle, const Goal& goal) {
+    // Высота линии (уровень низа штанг)
+    float lineY = goal.position.y + goal.height / 2;
+    
+    // Проверяем, находится ли мяч на уровне линии
+    if (abs(circle.position.y - lineY) <= circle.radius) {
+        // Левая ГОРИЗОНТАЛЬНАЯ белая линия СЛЕВА от левой штанги
+        float leftLineStartX = 0;
+        float leftLineEndX = goal.position.x - goal.width / 2 - 20.0f;
+        if (circle.position.x >= leftLineStartX && circle.position.x <= leftLineEndX) {
+            return true;
+        }
+        
+        // Правая ГОРИЗОНТАЛЬНАЯ белая линия СПРАВА от правой штанги
+        float rightLineStartX = goal.position.x + goal.width / 2 + 20.0f;
+        float rightLineEndX = MAX_WIDTH;
+        if (circle.position.x >= rightLineStartX && circle.position.x <= rightLineEndX) {
+            return true;
+        }
+    }
+    return false;
+}
+
 int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
     int minVelocity = 0, int maxVelocity = 0) {
     for (int i = 0; i < count; i++)
@@ -174,7 +218,7 @@ int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 
             MAX_HEIGHT / 2.0f + 100  // Немного ниже центра чтобы не попасть сразу в ворота
         };
 
-        circles.push_back(Circle{ position,velocity,accelerate,radius,weight,position });
+        circles.push_back(Circle{ position,velocity,accelerate,radius,weight,position,position });
     }
     return count;
 }
@@ -238,6 +282,13 @@ void ResetCircle(Circle& circle) {
     circle.accelerate = { 0, 0 };
 }
 
+// Функция для возврата круга в точку удара
+void ResetToHitPosition(Circle& circle) {
+    circle.position = circle.hitPosition;
+    circle.velocity = { 0, 0 };
+    circle.accelerate = { 0, 0 };
+}
+
 // Функция для обработки столкновений со стенами экрана
 void HandleWallCollision(Circle& circle) {
     // Столкновение с левой стеной
@@ -286,11 +337,6 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
 
         // Рисуем контур шкалы
         DrawRectangleLines(barPosition.x, barPosition.y, barWidth, barHeight, WHITE);
-
-        // Отображаем числовое значение силы (в процентах)
-        //char powerText[10];
-        //printf(powerText, "%.0f%%", power * 100);
-        //DrawText(powerText, barPosition.x + barWidth / 2 - 10, barPosition.y - 15, 10, WHITE);
     }
 }
 
@@ -303,6 +349,7 @@ int main()
     Circle* selectedCircle = nullptr;
     Vector2 dragStartPosition;
     int score = 0; // Счет голов
+    int coins = 0; // Счет монеток
 
     std::vector<Circle> circles;
     GenerateCircles(circles, 1, 15.0f, 0, 0);
@@ -319,6 +366,8 @@ int main()
                     dragging = true;
                     selectedCircle = &circle;
                     dragStartPosition = mousePosition;
+                    // Сохраняем позицию удара
+                    circle.hitPosition = circle.position;
                     break;
                 }
             }
@@ -378,21 +427,43 @@ int main()
                 ResetCircle(circle);
             }
 
+            // Проверяем полный залет мяча в ворота (для монетки)
+            if (CheckCompleteGoal(circle, goal)) {
+                coins++; // Добавляем монетку
+                ResetCircle(circle);
+            }
+
+            // Проверяем касание ГОРИЗОНТАЛЬНЫХ белых линий СБОКУ ОТ ШТАНГ
+            if (CheckSideLinesCollision(circle, goal)) {
+                ResetToHitPosition(circle);
+            }
+
             // Обработка столкновений со стенами
             HandleWallCollision(circle);
 
-            // Обработка столкновений с воротами
+            // Обработка столкновений с воротами (мяч отскакивает от штанг)
             HandleGoalCollision(circle, goal);
         }
 
         BeginDrawing();
         ClearBackground(DARKGREEN);
 
-        // Рисуем линию ворот (по всей ширине экрана)
-        float goalLineY = goal.position.y - goal.height / 2;
-        DrawLine(0, goalLineY, MAX_WIDTH, goalLineY, WHITE);
+        // Координаты для линий на уровне низа штанг
+        float postBottomY = goal.position.y + goal.height / 2;
+        float leftPostX = goal.position.x - goal.width / 2;
+        float rightPostX = goal.position.x + goal.width / 2;
 
-        // Рисуем ворота
+        // Рисуем желтую линию на уровне низа штанг (горизонтальная) - для монеток
+        DrawLine(leftPostX, postBottomY, rightPostX, postBottomY, YELLOW);
+
+        // Рисуем ГОРИЗОНТАЛЬНЫЕ белые линии СБОКУ ОТ ШТАНГ
+        // Левая ГОРИЗОНТАЛЬНАЯ белая линия СЛЕВА от левой штанги
+        DrawLine(0, postBottomY, leftPostX - 20.0f, postBottomY, WHITE);
+        
+        // Правая ГОРИЗОНТАЛЬНАЯ белая линия СПРАВА от правой штанги
+        DrawLine(rightPostX + 20.0f, postBottomY, MAX_WIDTH, postBottomY, WHITE);
+       
+        // Рисуем ворота (штангИ)
         DrawGoal(goal);
 
         // Рисуем круги
@@ -408,10 +479,9 @@ int main()
             DrawLineV(selectedCircle->position, mousePosition, RED);
         }
 
-        // Отображаем счет
-        //char scoreText[20];
-        //printf(scoreText, "Score: %d", score);
-        //DrawText(scoreText, 10, 10, 20, WHITE);
+        // Отображаем счет и монетки
+        DrawText(TextFormat("Score: %d", score), 10, 10, 20, WHITE);
+        DrawText(TextFormat("Coins: %d", coins), 10, 40, 20, YELLOW);
 
         EndDrawing();
     }
