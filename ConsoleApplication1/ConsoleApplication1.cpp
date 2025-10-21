@@ -14,7 +14,16 @@ enum GameState {
     MENU,
     PLAYING,
     SHOP,
-    COLLECTION
+    COLLECTION,
+    TWO_PLAYERS_MENU,
+    TWO_PLAYERS_GAME,
+    GAME_MODE_SELECTION
+};
+
+// Режимы игры
+enum GameMode {
+    FREE_KICK,
+    PENALTY
 };
 
 // Структура для футболиста
@@ -54,6 +63,8 @@ struct Goalkeeper {
     float jumpTimer;
     Vector2 jumpDirection;
     Texture2D texture;    // Текстура вратаря
+    int playerControlled; // 0 - AI, 1 - Игрок 1, 2 - Игрок 2
+    float moveSpeed;      // Скорость движения для игрока
 };
 
 struct Circle {
@@ -67,6 +78,8 @@ struct Circle {
     bool hasSpin[4];       // Типы кручения: 0=влево, 1=вправо, 2=вверх, 3=вниз
     float spinForce[4];    // Сила каждого типа кручения
     Vector2 spinDirection[4]; // Направление каждого типа кручения
+    int controllingPlayer; // Какой игрок управляет мячом (1 или 2)
+    bool canMoveFreely;    // Может ли мяч свободно перемещаться
 };
 
 // Структура для анимации
@@ -87,6 +100,9 @@ struct Animation {
 int coins = 0;
 std::vector<Footballer> footballers;
 Texture2D packTexture = { 0 };
+GameMode currentGameMode = FREE_KICK;
+int collectionPage = 0; // Текущая страница коллекции
+int playersPerPage = 6; // Игроков на странице
 
 // Анимации
 Animation goalAnimation = { false };
@@ -201,7 +217,7 @@ Goal CreateGoal(float width, float height, Vector2 position) {
 }
 
 // Функция для создания вратаря
-Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const char* texturePath) {
+Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const char* texturePath, int playerControlled = 0) {
     Goalkeeper keeper;
     keeper.width = width;
     keeper.height = height;
@@ -212,6 +228,8 @@ Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const c
     keeper.isJumping = false;
     keeper.jumpTimer = 0;
     keeper.jumpDirection = { 0, 0 };
+    keeper.playerControlled = playerControlled;
+    keeper.moveSpeed = 300.0f; // Скорость движения для игрока
 
     // Загружаем текстуру вратаря
     Image image = LoadImage(texturePath);
@@ -231,7 +249,7 @@ Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const c
 void LoadFootballers() {
     footballers.clear();
 
-    // Добавляем 5 футболистов (замени пути на свои PNG файлы)
+    // Добавляем 15 футболистов (замени пути на свои PNG файлы)
     Footballer f1;
     f1.texture = LoadTexture("player1.png");
     f1.name = "Messi";
@@ -261,6 +279,67 @@ void LoadFootballers() {
     f5.name = "Haaland";
     f5.unlocked = false;
     footballers.push_back(f5);
+
+    // Добавляем еще 10 футболистов
+    Footballer f6;
+    f6.texture = LoadTexture("player6.png");
+    f6.name = "Lewandowski";
+    f6.unlocked = false;
+    footballers.push_back(f6);
+
+    Footballer f7;
+    f7.texture = LoadTexture("player7.png");
+    f7.name = "Benzema";
+    f7.unlocked = false;
+    footballers.push_back(f7);
+
+    Footballer f8;
+    f8.texture = LoadTexture("player8.png");
+    f8.name = "Salah";
+    f8.unlocked = false;
+    footballers.push_back(f8);
+
+    Footballer f9;
+    f9.texture = LoadTexture("player9.png");
+    f9.name = "Kane";
+    f9.unlocked = false;
+    footballers.push_back(f9);
+
+    Footballer f10;
+    f10.texture = LoadTexture("player10.png");
+    f10.name = "De Bruyne";
+    f10.unlocked = false;
+    footballers.push_back(f10);
+
+    Footballer f11;
+    f11.texture = LoadTexture("player11.png");
+    f11.name = "Modric";
+    f11.unlocked = false;
+    footballers.push_back(f11);
+
+    Footballer f12;
+    f12.texture = LoadTexture("player12.png");
+    f12.name = "Van Dijk";
+    f12.unlocked = false;
+    footballers.push_back(f12);
+
+    Footballer f13;
+    f13.texture = LoadTexture("player13.png");
+    f13.name = "Courtois";
+    f13.unlocked = false;
+    footballers.push_back(f13);
+
+    Footballer f14;
+    f14.texture = LoadTexture("player14.png");
+    f14.name = "Son";
+    f14.unlocked = false;
+    footballers.push_back(f14);
+
+    Footballer f15;
+    f15.texture = LoadTexture("player15.png");
+    f15.name = "Zlatan";
+    f15.unlocked = false;
+    footballers.push_back(f15);
 }
 
 // Функция для запуска анимации гола
@@ -309,10 +388,7 @@ void OpenPack() {
 
         // Сохраняем прогресс после разблокировки футболиста
         SaveProgress();
-
-
     }
-
 }
 
 // Функция для обновления анимаций
@@ -602,9 +678,9 @@ bool CheckSideLinesCollision(const Circle& circle, const Goal& goal) {
     return false;
 }
 
-// Функция для прыжка вратаря
+// Функция для прыжка вратаря (AI)
 void MakeGoalkeeperJump(Goalkeeper& keeper) {
-    if (!keeper.isJumping) {
+    if (!keeper.isJumping && keeper.playerControlled == 0) {
         keeper.isJumping = true;
         keeper.jumpTimer = 0.5f; // Время прыжка в секундах
 
@@ -629,49 +705,64 @@ void MakeGoalkeeperJump(Goalkeeper& keeper) {
 
 // Функция для обновления вратаря
 void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
-    if (keeper.isJumping) {
-        // Обновляем таймер прыжка
-        keeper.jumpTimer -= deltaTime;
+    if (keeper.playerControlled == 0) {
+        // AI вратарь
+        if (keeper.isJumping) {
+            // Обновляем таймер прыжка
+            keeper.jumpTimer -= deltaTime;
 
-        // Обновляем позицию
-        keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
+            // Обновляем позицию
+            keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
 
-        // Добавляем гравитацию
-        keeper.velocity.y += 400.0f * deltaTime; // Уменьшил гравитацию
+            // Добавляем гравитацию
+            keeper.velocity.y += 400.0f * deltaTime; // Уменьшил гравитацию
 
-        // ОГРАНИЧИВАЕМ ПОЗИЦИЮ ВРАТАРЯ В ПРЕДЕЛАХ ВОРОТ (уже границы)
-        float goalLeft = keeper.startPosition.x - 50; // Левая граница ворот (уже)
-        float goalRight = keeper.startPosition.x + 50; // Правая граница ворот (уже)
-        float goalTop = keeper.startPosition.y - 20; // Верхняя граница
-        float goalBottom = keeper.startPosition.y + 20; // Нижняя граница
+            // ОГРАНИЧИВАЕМ ПОЗИЦИЮ ВРАТАРЯ В ПРЕДЕЛАх ВОРОТ (уже границы)
+            float goalLeft = keeper.startPosition.x - 50; // Левая граница ворот (уже)
+            float goalRight = keeper.startPosition.x + 50; // Правая граница ворот (уже)
+            float goalTop = keeper.startPosition.y - 20; // Верхняя граница
+            float goalBottom = keeper.startPosition.y + 20; // Нижняя граница
 
-        // Ограничение по горизонтали
-        if (keeper.position.x < goalLeft) {
-            keeper.position.x = goalLeft;
-            keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
+            // Ограничение по горизонтали
+            if (keeper.position.x < goalLeft) {
+                keeper.position.x = goalLeft;
+                keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
+            }
+            if (keeper.position.x > goalRight) {
+                keeper.position.x = goalRight;
+                keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
+            }
+
+            // Ограничение по вертикали
+            if (keeper.position.y < goalTop) {
+                keeper.position.y = goalTop;
+                keeper.velocity.y = -keeper.velocity.y * 0.3f;
+            }
+            if (keeper.position.y > goalBottom) {
+                keeper.position.y = goalBottom;
+                keeper.velocity.y = -keeper.velocity.y * 0.3f;
+            }
+
+            // Завершение прыжка
+            if (keeper.jumpTimer <= 0) {
+                keeper.isJumping = false;
+                // Плавное возвращение на стартовую позицию
+                Vector2 direction = Vector2Subtract(keeper.startPosition, keeper.position);
+                if (Vector2Length(direction) > 2.0f) { // Более точное возвращение
+                    keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f); // Медленнее возвращение
+                }
+                else {
+                    keeper.velocity = { 0, 0 };
+                    keeper.position = keeper.startPosition;
+                }
+            }
         }
-        if (keeper.position.x > goalRight) {
-            keeper.position.x = goalRight;
-            keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
-        }
-
-        // Ограничение по вертикали
-        if (keeper.position.y < goalTop) {
-            keeper.position.y = goalTop;
-            keeper.velocity.y = -keeper.velocity.y * 0.3f;
-        }
-        if (keeper.position.y > goalBottom) {
-            keeper.position.y = goalBottom;
-            keeper.velocity.y = -keeper.velocity.y * 0.3f;
-        }
-
-        // Завершение прыжка
-        if (keeper.jumpTimer <= 0) {
-            keeper.isJumping = false;
+        else {
             // Плавное возвращение на стартовую позицию
             Vector2 direction = Vector2Subtract(keeper.startPosition, keeper.position);
-            if (Vector2Length(direction) > 2.0f) { // Более точное возвращение
-                keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f); // Медленнее возвращение
+            if (Vector2Length(direction) > 2.0f) {
+                keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f);
+                keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
             }
             else {
                 keeper.velocity = { 0, 0 };
@@ -680,16 +771,60 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
         }
     }
     else {
-        // Плавное возвращение на стартовую позицию
-        Vector2 direction = Vector2Subtract(keeper.startPosition, keeper.position);
-        if (Vector2Length(direction) > 2.0f) {
-            keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f);
-            keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
+        // Игрок управляет вратарем
+        Vector2 newVelocity = { 0, 0 };
+
+        // Управление стрелками
+        if (IsKeyDown(KEY_LEFT)) {
+            newVelocity.x = -keeper.moveSpeed;
         }
-        else {
-            keeper.velocity = { 0, 0 };
-            keeper.position = keeper.startPosition;
+        if (IsKeyDown(KEY_RIGHT)) {
+            newVelocity.x = keeper.moveSpeed;
         }
+        if (IsKeyDown(KEY_UP)) {
+            newVelocity.y = -keeper.moveSpeed;
+        }
+        if (IsKeyDown(KEY_DOWN)) {
+            newVelocity.y = keeper.moveSpeed;
+        }
+
+        // Прыжок на пробел
+        if (IsKeyPressed(KEY_SPACE) && !keeper.isJumping) {
+            keeper.isJumping = true;
+            keeper.jumpTimer = 0.3f;
+            keeper.velocity.y = -300.0f; // Прыжок вверх
+        }
+
+        // Обновление прыжка
+        if (keeper.isJumping) {
+            keeper.jumpTimer -= deltaTime;
+            keeper.velocity.y += 600.0f * deltaTime; // Гравитация
+
+            if (keeper.jumpTimer <= 0 && keeper.position.y >= keeper.startPosition.y) {
+                keeper.isJumping = false;
+                keeper.velocity.y = 0;
+                keeper.position.y = keeper.startPosition.y;
+            }
+        }
+
+        // Применяем скорость движения
+        if (!keeper.isJumping) {
+            keeper.velocity = newVelocity;
+        }
+
+        // Обновляем позицию
+        keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
+
+        // Ограничиваем позицию вратаря в пределах ворот
+        float goalLeft = keeper.startPosition.x - 70;
+        float goalRight = keeper.startPosition.x + 70;
+        float goalTop = keeper.startPosition.y - 40;
+        float goalBottom = keeper.startPosition.y + 40;
+
+        if (keeper.position.x < goalLeft) keeper.position.x = goalLeft;
+        if (keeper.position.x > goalRight) keeper.position.x = goalRight;
+        if (keeper.position.y < goalTop) keeper.position.y = goalTop;
+        if (keeper.position.y > goalBottom) keeper.position.y = goalBottom;
     }
 
     // Обновляем границы вратаря
@@ -781,7 +916,7 @@ void UpdateSpin(Circle& circle, float deltaTime) {
 }
 
 int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
-    int minVelocity = 0, int maxVelocity = 0) {
+    int minVelocity = 0, int maxVelocity = 0, GameMode mode = FREE_KICK) {
     for (int i = 0; i < count; i++)
     {
         Vector2 velocity = {
@@ -791,11 +926,22 @@ int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 
         Vector2 accelerate = { 0,0 };
         float weight = radius / 3;
 
-        // Генерация по центру экрана (но ниже ворот)
-        Vector2 position = {
-            MAX_WIDTH / 2.0f,
-            MAX_HEIGHT / 2.0f + 100  // Немного ниже центра чтобы не попасть сразу в ворота
-        };
+        // Позиция мяча в зависимости от режима
+        Vector2 position;
+        if (mode == PENALTY) {
+            // Для пенальти - фиксированная позиция
+            position = {
+                MAX_WIDTH / 2.0f,
+                MAX_HEIGHT - 150.0f  // Фиксированная позиция для пенальти
+            };
+        }
+        else {
+            // Для свободного удара - начальная позиция как раньше
+            position = {
+                MAX_WIDTH / 2.0f,
+                MAX_HEIGHT / 2.0f + 100
+            };
+        }
 
         Circle newCircle = { position,velocity,accelerate,radius,weight,position,position };
         for (int j = 0; j < 4; j++) {
@@ -803,6 +949,8 @@ int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 
             newCircle.spinForce[j] = 0.0f;
             newCircle.spinDirection[j] = { 0, 0 };
         }
+        newCircle.controllingPlayer = 1; // По умолчанию управляет игрок 1
+        newCircle.canMoveFreely = (mode == FREE_KICK); // В свободном ударе можно перемещать мяч
         circles.push_back(newCircle);
     }
     return count;
@@ -861,8 +1009,16 @@ bool IsCircleOutOfBounds(const Circle& circle) {
 }
 
 // Функция для возврата круга на стартовую позицию
-void ResetCircle(Circle& circle) {
-    circle.position = circle.startPosition;
+void ResetCircle(Circle& circle, GameMode mode) {
+    if (mode == PENALTY) {
+        // В режиме пенальти всегда возвращаем на фиксированную позицию
+        circle.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT - 150.0f };
+    }
+    else {
+        // В режиме свободного удара возвращаем на стартовую позицию
+        circle.position = circle.startPosition;
+    }
+
     circle.velocity = { 0, 0 };
     circle.accelerate = { 0, 0 };
     for (int i = 0; i < 4; i++) {
@@ -870,11 +1026,20 @@ void ResetCircle(Circle& circle) {
         circle.spinForce[i] = 0.0f;
         circle.spinDirection[i] = { 0, 0 };
     }
+    circle.canMoveFreely = true;
 }
 
 // Функция для возврата круга в точку удара
-void ResetToHitPosition(Circle& circle) {
-    circle.position = circle.hitPosition;
+void ResetToHitPosition(Circle& circle, GameMode mode) {
+    if (mode == PENALTY) {
+        // В режиме пенальти всегда возвращаем на фиксированную позицию
+        circle.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT - 150.0f };
+    }
+    else {
+        // В режиме свободного удара возвращаем в точку удара
+        circle.position = circle.hitPosition;
+    }
+
     circle.velocity = { 0, 0 };
     circle.accelerate = { 0, 0 };
     for (int i = 0; i < 4; i++) {
@@ -882,6 +1047,7 @@ void ResetToHitPosition(Circle& circle) {
         circle.spinForce[i] = 0.0f;
         circle.spinDirection[i] = { 0, 0 };
     }
+    circle.canMoveFreely = true;
 }
 
 // Функция для обработки столкновений со стенами экрана
@@ -959,7 +1125,7 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
 }
 
 // Функция для отрисовки главного меню
-void DrawMainMenu(Button playButton, Button shopButton, Button collectionButton, Button exitButton) {
+void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton, Button collectionButton, Button exitButton) {
     // Заголовок
     DrawText("FOOTBALL GAME", MAX_WIDTH / 2 - MeasureText("FOOTBALL GAME", 40) / 2, 100, 40, WHITE);
 
@@ -968,9 +1134,37 @@ void DrawMainMenu(Button playButton, Button shopButton, Button collectionButton,
 
     // Кнопки
     DrawButton(playButton);
+    DrawButton(twoPlayersButton);
     DrawButton(shopButton);
     DrawButton(collectionButton);
     DrawButton(exitButton);
+}
+
+// Функция для отрисовки меню двух игроков
+void DrawTwoPlayersMenu(Button player1KeeperButton, Button player2KeeperButton, Button backButton) {
+    DrawText("2 PLAYERS MODE", MAX_WIDTH / 2 - MeasureText("2 PLAYERS MODE", 40) / 2, 100, 40, WHITE);
+    DrawText("Choose who controls goalkeeper:", MAX_WIDTH / 2 - MeasureText("Choose who controls goalkeeper:", 25) / 2, 160, 25, WHITE);
+
+    DrawButton(player1KeeperButton);
+    DrawButton(player2KeeperButton);
+    DrawButton(backButton);
+}
+
+// Функция для отрисовки выбора режима игры
+void DrawGameModeSelection(Button freeKickButton, Button penaltyButton, Button backButton) {
+    DrawText("SELECT GAME MODE", MAX_WIDTH / 2 - MeasureText("SELECT GAME MODE", 40) / 2, 100, 40, WHITE);
+
+    DrawText("FREE KICK:", MAX_WIDTH / 2 - MeasureText("FREE KICK:", 25) / 2, 170, 25, GREEN);
+    DrawText("- Move ball anywhere", MAX_WIDTH / 2 - MeasureText("- Move ball anywhere", 20) / 2, 200, 20, WHITE);
+    DrawText("- Multiple shots allowed", MAX_WIDTH / 2 - MeasureText("- Multiple shots allowed", 20) / 2, 225, 20, WHITE);
+
+    DrawText("PENALTY:", MAX_WIDTH / 2 - MeasureText("PENALTY:", 25) / 2, 270, 25, YELLOW);
+    DrawText("- Fixed ball position", MAX_WIDTH / 2 - MeasureText("- Fixed ball position", 20) / 2, 300, 20, WHITE);
+    DrawText("- One shot per round", MAX_WIDTH / 2 - MeasureText("- One shot per round", 20) / 2, 325, 20, WHITE);
+
+    DrawButton(freeKickButton);
+    DrawButton(penaltyButton);
+    DrawButton(backButton);
 }
 
 // Функция для отрисовки магазина
@@ -1008,7 +1202,7 @@ void DrawShop() {
     DrawText("H - Back to Menu", 10, MAX_HEIGHT - 30, 20, WHITE);
 }
 
-// Функция для отрисовки коллекции - С УВЕЛИЧЕННЫМИ КАРТОЧКАМИ
+// Функция для отрисовки коллекции - С БОЛЬШИМИ КАРТОЧКАМИ И ПОСТРАНИЧНЫМ ПРОСМОТРОМ
 void DrawCollection() {
     DrawText("COLLECTION", MAX_WIDTH / 2 - MeasureText("COLLECTION", 40) / 2, 50, 40, WHITE);
 
@@ -1021,22 +1215,33 @@ void DrawCollection() {
         MAX_WIDTH / 2 - MeasureText(TextFormat("Unlocked: %d/%d", unlockedCount, footballers.size()), 25) / 2,
         100, 25, WHITE);
 
-    // Отображаем футболистов с УВЕЛИЧЕННЫМИ КАРТОЧКАМИ
-    float startX = 50;
-    float startY = 150;
-    float cardWidth = 160;  // УВЕЛИЧЕНА ШИРИНА КАРТОЧКИ
-    float cardHeight = 190; // УВЕЛИЧЕНА ВЫСОТА КАРТОЧКИ
-    float spacingX = 170;   // УВЕЛИЧЕНО РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО X
-    float spacingY = 200;   // УВЕЛИЧЕНО РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО Y
+    // Отображаем номер страницы
+    int totalPages = (footballers.size() + playersPerPage - 1) / playersPerPage;
+    DrawText(TextFormat("Page %d/%d", collectionPage + 1, totalPages),
+        MAX_WIDTH / 2 - MeasureText(TextFormat("Page %d/%d", collectionPage + 1, totalPages), 20) / 2,
+        130, 20, WHITE);
 
-    for (int i = 0; i < footballers.size(); i++) {
-        float x = startX + (i % 3) * spacingX;
-        float y = startY + (i / 3) * spacingY;
+    // Отображаем футболистов с БОЛЬШИМИ КАРТОЧКАМИ
+    float startX = 50;
+    float startY = 170;
+    float cardWidth = 160;  // БОЛЬШАЯ ШИРИНА КАРТОЧКИ
+    float cardHeight = 200; // БОЛЬШАЯ ВЫСОТА КАРТОЧКИ
+    float spacingX = 180;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО X
+    float spacingY = 220;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО Y
+
+    int startIndex = collectionPage * playersPerPage;
+    int endIndex = startIndex + playersPerPage;
+    if (endIndex > footballers.size()) endIndex = footballers.size();
+
+    for (int i = startIndex; i < endIndex; i++) {
+        int indexOnPage = i - startIndex;
+        float x = startX + (indexOnPage % 3) * spacingX;
+        float y = startY + (indexOnPage / 3) * spacingY;
 
         if (footballers[i].unlocked) {
             // Отображаем разблокированного футболиста
             if (footballers[i].texture.id != 0) {
-                Rectangle playerRect = { x, y, cardWidth, cardHeight - 40 }; // УВЕЛИЧЕНА ОБЛАСТЬ ТЕКСТУРЫ
+                Rectangle playerRect = { x, y, cardWidth, cardHeight - 40 };
                 DrawTexturePro(footballers[i].texture, { 0, 0, (float)footballers[i].texture.width, (float)footballers[i].texture.height },
                     playerRect, { 0, 0 }, 0, WHITE);
 
@@ -1064,7 +1269,29 @@ void DrawCollection() {
         }
     }
 
-    DrawText("H - Back to Menu", 10, MAX_HEIGHT - 30, 20, WHITE);
+    // Кнопки перелистывания страниц
+    if (collectionPage > 0) {
+        DrawText("<< PREV", 20, MAX_HEIGHT - 40, 20, WHITE);
+    }
+    if ((collectionPage + 1) * playersPerPage < footballers.size()) {
+        DrawText("NEXT >>", MAX_WIDTH - 100, MAX_HEIGHT - 40, 20, WHITE);
+    }
+
+    DrawText("H - Back to Menu", 10, MAX_HEIGHT - 70, 20, WHITE);
+}
+
+// Функция для отрисовки счета в режиме двух игроков
+void DrawTwoPlayersScore(int player1Score, int player2Score) {
+    DrawText(TextFormat("PLAYER 1: %d", player1Score), 10, 10, 20, BLUE);
+    DrawText(TextFormat("PLAYER 2: %d", player2Score), MAX_WIDTH - 150, 10, 20, RED);
+}
+
+// Функция для отрисовки текущего режима игры
+void DrawGameModeInfo(GameMode mode) {
+    const char* modeText = (mode == FREE_KICK) ? "FREE KICK" : "PENALTY";
+    Color modeColor = (mode == FREE_KICK) ? GREEN : YELLOW;
+
+    DrawText(TextFormat("MODE: %s", modeText), MAX_WIDTH / 2 - MeasureText(TextFormat("MODE: %s", modeText), 20) / 2, 70, 20, modeColor);
 }
 
 int main()
@@ -1076,27 +1303,40 @@ int main()
     GameState gameState = MENU;
 
     // Кнопки меню
-    Button playButton = CreateButton(MAX_WIDTH / 2 - 100, 200, 200, 50, "PLAY", BLUE, WHITE);
-    Button shopButton = CreateButton(MAX_WIDTH / 2 - 100, 270, 200, 50, "SHOP", GREEN, WHITE);
-    Button collectionButton = CreateButton(MAX_WIDTH / 2 - 100, 340, 200, 50, "COLLECTION", PURPLE, WHITE);
-    Button exitButton = CreateButton(MAX_WIDTH / 2 - 100, 410, 200, 50, "EXIT", RED, WHITE);
+    Button playButton = CreateButton(MAX_WIDTH / 2 - 100, 200, 200, 50, "1 PLAYER", BLUE, WHITE);
+    Button twoPlayersButton = CreateButton(MAX_WIDTH / 2 - 100, 270, 200, 50, "2 PLAYERS", GREEN, WHITE);
+    Button shopButton = CreateButton(MAX_WIDTH / 2 - 100, 340, 200, 50, "SHOP", PURPLE, WHITE);
+    Button collectionButton = CreateButton(MAX_WIDTH / 2 - 100, 410, 200, 50, "COLLECTION", ORANGE, WHITE);
+    Button exitButton = CreateButton(MAX_WIDTH / 2 - 100, 480, 200, 50, "EXIT", RED, WHITE);
+
+    // Кнопки меню двух игроков (УВЕЛИЧЕНЫ В ШИРИНУ)
+    Button player1KeeperButton = CreateButton(MAX_WIDTH / 2 - 150, 200, 300, 50, "PLAYER 1 - KEEPER", BLUE, WHITE);
+    Button player2KeeperButton = CreateButton(MAX_WIDTH / 2 - 150, 270, 300, 50, "PLAYER 2 - KEEPER", RED, WHITE);
+    Button backButton = CreateButton(MAX_WIDTH / 2 - 150, 340, 300, 50, "BACK", GRAY, WHITE);
+
+    // Кнопки выбора режима игры (УВЕЛИЧЕНЫ В ШИРИНУ)
+    Button freeKickButton = CreateButton(MAX_WIDTH / 2 - 150, 350, 300, 50, "FREE KICK", GREEN, WHITE);
+    Button penaltyButton = CreateButton(MAX_WIDTH / 2 - 150, 420, 300, 50, "PENALTY", YELLOW, WHITE);
+    Button modeBackButton = CreateButton(MAX_WIDTH / 2 - 150, 490, 300, 50, "BACK", GRAY, WHITE);
 
     // Игровые объекты
     bool dragging = false;
     Circle* selectedCircle = nullptr;
     Vector2 dragStartPosition;
-    int score = 0; // Счет голов
+    int score = 0; // Счет голов для одного игрока
+    int player1Score = 0, player2Score = 0; // Счет для двух игроков
     bool spinActive[4] = { false, false, false, false }; // Типы кручения: 0=влево, 1=вправо, 2=вверх, 3=вниз
     bool slowMoActive = false; // Активен ли режим слоумо
     float slowMoFactor = 0.3f; // Коэффициент замедления
+    int goalkeeperController = 0; // Кто управляет вратарем в режиме двух игроков
+    bool isSinglePlayer = true; // Режим одного игрока по умолчанию
 
     std::vector<Circle> circles;
-    GenerateCircles(circles, 1, 15.0f, 0, 0);
 
     // Создаем ворота вверху экрана (опущены ниже)
     Goal goal = CreateGoal(200.0f, 100.0f, { MAX_WIDTH / 2.0f, 150.0f });
 
-    // Создаем вратаря с PNG текстурой
+    // Создаем вратаря с PNG текстурой (по умолчанию AI)
     Goalkeeper goalkeeper = CreateGoalkeeper(80.0f, 60.0f, { MAX_WIDTH / 2.0f, goal.position.y + 20.0f }, "goalkeeper (1).png");
 
     // Загружаем пак
@@ -1129,7 +1369,27 @@ int main()
 
         // Обработка нажатия H для возврата в меню
         if (IsKeyPressed(KEY_H)) {
-            gameState = MENU;
+            if (gameState == TWO_PLAYERS_GAME || gameState == PLAYING) {
+                gameState = GAME_MODE_SELECTION;
+            }
+            else if (gameState == GAME_MODE_SELECTION) {
+                if (isSinglePlayer) {
+                    gameState = MENU;
+                }
+                else {
+                    gameState = TWO_PLAYERS_MENU;
+                }
+            }
+            else if (gameState == TWO_PLAYERS_MENU) {
+                gameState = MENU;
+            }
+            else if (gameState == COLLECTION) {
+                gameState = MENU;
+                collectionPage = 0; // Сбрасываем страницу при выходе
+            }
+            else {
+                gameState = MENU;
+            }
             slowMoActive = false;
         }
 
@@ -1146,20 +1406,98 @@ int main()
         switch (gameState) {
         case MENU:
             if (IsButtonClicked(playButton)) {
-                gameState = PLAYING;
+                gameState = GAME_MODE_SELECTION;
+                isSinglePlayer = true;
                 score = 0;
+                // Сбрасываем вратаря в AI режим
+                goalkeeper.playerControlled = 0;
+            }
+            if (IsButtonClicked(twoPlayersButton)) {
+                gameState = TWO_PLAYERS_MENU;
+                isSinglePlayer = false;
+                player1Score = 0;
+                player2Score = 0;
             }
             if (IsButtonClicked(shopButton)) {
                 gameState = SHOP;
             }
             if (IsButtonClicked(collectionButton)) {
                 gameState = COLLECTION;
+                collectionPage = 0; // Сбрасываем на первую страницу
             }
             if (IsButtonClicked(exitButton)) {
                 // Сохраняем прогресс перед выходом
                 SaveProgress();
                 CloseWindow();
                 return 0;
+            }
+            break;
+
+        case TWO_PLAYERS_MENU:
+            if (IsButtonClicked(player1KeeperButton)) {
+                gameState = GAME_MODE_SELECTION;
+                goalkeeperController = 1;
+                goalkeeper.playerControlled = 1;
+            }
+            if (IsButtonClicked(player2KeeperButton)) {
+                gameState = GAME_MODE_SELECTION;
+                goalkeeperController = 2;
+                goalkeeper.playerControlled = 2;
+            }
+            if (IsButtonClicked(backButton)) {
+                gameState = MENU;
+            }
+            break;
+
+        case GAME_MODE_SELECTION:
+            if (IsButtonClicked(freeKickButton)) {
+                currentGameMode = FREE_KICK;
+                // Генерируем мяч в зависимости от режима
+                circles.clear();
+                GenerateCircles(circles, 1, 15.0f, 0, 0, currentGameMode);
+
+                if (isSinglePlayer) {
+                    gameState = PLAYING;
+                }
+                else {
+                    gameState = TWO_PLAYERS_GAME;
+                }
+            }
+            if (IsButtonClicked(penaltyButton)) {
+                currentGameMode = PENALTY;
+                // Генерируем мяч в зависимости от режима
+                circles.clear();
+                GenerateCircles(circles, 1, 15.0f, 0, 0, currentGameMode);
+
+                if (isSinglePlayer) {
+                    gameState = PLAYING;
+                }
+                else {
+                    gameState = TWO_PLAYERS_GAME;
+                }
+            }
+            if (IsButtonClicked(modeBackButton)) {
+                if (isSinglePlayer) {
+                    gameState = MENU;
+                }
+                else {
+                    gameState = TWO_PLAYERS_MENU;
+                }
+            }
+            break;
+
+        case COLLECTION:
+            // Обработка перелистывания страниц
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                // Кнопка "PREV"
+                if (collectionPage > 0 && CheckCollisionPointRec(mousePosition, { 20, MAX_HEIGHT - 40, 80, 20 })) {
+                    collectionPage--;
+                }
+                // Кнопка "NEXT"
+                if ((collectionPage + 1) * playersPerPage < footballers.size() &&
+                    CheckCollisionPointRec(mousePosition, { MAX_WIDTH - 100, MAX_HEIGHT - 40, 80, 20 })) {
+                    collectionPage++;
+                }
             }
             break;
 
@@ -1179,6 +1517,11 @@ int main()
             // Игровая логика
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 for (auto& circle : circles) {
+                    // В режиме пенальти проверяем, можно ли перемещать мяч
+                    if (currentGameMode == PENALTY && !circle.canMoveFreely) {
+                        continue; // Пропускаем мяч, который нельзя перемещать
+                    }
+
                     if (CheckCollisionPointCircle(mousePosition, circle.position, circle.radius)) {
                         dragging = true;
                         selectedCircle = &circle;
@@ -1237,8 +1580,15 @@ int main()
                         ApplySpin(*selectedCircle, direction, spinActive);
                     }
 
-                    // Вратарь прыгает при ударе
-                    MakeGoalkeeperJump(goalkeeper);
+                    // Вратарь прыгает при ударе (только если AI)
+                    if (goalkeeper.playerControlled == 0) {
+                        MakeGoalkeeperJump(goalkeeper);
+                    }
+
+                    // В режиме пенальти после удара мяч нельзя больше перемещать
+                    if (currentGameMode == PENALTY) {
+                        selectedCircle->canMoveFreely = false;
+                    }
                 }
                 dragging = false;
                 selectedCircle = nullptr;
@@ -1261,12 +1611,12 @@ int main()
 
                 // Проверяем вылет за границы
                 if (IsCircleOutOfBounds(circle)) {
-                    ResetCircle(circle);
+                    ResetCircle(circle, currentGameMode);
                 }
 
                 // Проверяем пересечение линии ворот (мимо ворот)
                 if (CheckGoalLineCrossing(circle, goal)) {
-                    ResetCircle(circle);
+                    ResetCircle(circle, currentGameMode);
                 }
 
                 // Проверяем касание зеленой линии (гол)
@@ -1275,12 +1625,12 @@ int main()
                     coins++; // Добавляем монетку за гол
                     SaveProgress(); // Сохраняем прогресс после получения монет
                     StartGoalAnimation(); // Запускаем анимацию гола
-                    ResetCircle(circle);
+                    ResetCircle(circle, currentGameMode);
                 }
 
                 // Проверяем касание ГОРИЗОНТАЛЬНЫХ белых линий СБОКУ ОТ ШТАНГ
                 if (CheckSideLinesCollision(circle, goal)) {
-                    ResetToHitPosition(circle);
+                    ResetToHitPosition(circle, currentGameMode);
                 }
 
                 // Обработка столкновений со стенами
@@ -1288,6 +1638,162 @@ int main()
 
                 // Обработка столкновений с воротами (мяч отскакивает от штанг)
                 HandleGoalCollision(circle, goal);
+
+                // В режиме пенальти, если мяч почти остановился, возвращаем его на стартовую позицию
+                if (currentGameMode == PENALTY && !circle.canMoveFreely && Vector2Length(circle.velocity) < 10.0f) {
+                    ResetCircle(circle, currentGameMode);
+                }
+            }
+        }
+        break;
+
+        case TWO_PLAYERS_GAME:
+        {
+            // Управление для игрока 1 (бьющий) - WASD для кручения
+            spinActive[0] = IsKeyDown(KEY_A); // Влево
+            spinActive[1] = IsKeyDown(KEY_D); // Вправо
+            spinActive[2] = IsKeyDown(KEY_W); // Вверх
+            spinActive[3] = IsKeyDown(KEY_S); // Вниз
+
+            // Игровая логика для игрока 1
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                for (auto& circle : circles) {
+                    // В режиме пенальти проверяем, можно ли перемещать мяч
+                    if (currentGameMode == PENALTY && !circle.canMoveFreely) {
+                        continue; // Пропускаем мяч, который нельзя перемещать
+                    }
+
+                    if (CheckCollisionPointCircle(mousePosition, circle.position, circle.radius) && circle.controllingPlayer == 1) {
+                        dragging = true;
+                        selectedCircle = &circle;
+                        dragStartPosition = mousePosition;
+                        // Сохраняем позицию удара
+                        circle.hitPosition = circle.position;
+                        break;
+                    }
+                }
+            }
+
+            std::vector<std::pair<Circle*, Circle*>> collisions;
+
+            for (int i = 0; i < circles.size() - 1; ++i) {
+                for (int j = i + 1; j < circles.size(); ++j) {
+                    HandleCollision(collisions, circles[i], circles[j]);
+                }
+            }
+
+            for (auto& collision : collisions) {
+                DynamicCollisionResolution(*collision.first, *collision.second);
+            }
+
+            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                if (selectedCircle != nullptr) {
+                    // Вычисляем направление и силу удара
+                    Vector2 direction = Vector2Subtract(selectedCircle->position, mousePosition);
+                    float distance = Vector2Length(direction);
+
+                    // Ограничиваем максимальную дистанцию для контроля силы
+                    float maxDistance = 150.0f;
+                    if (distance > maxDistance) {
+                        distance = maxDistance;
+                        direction = Vector2Scale(Vector2Normalize(direction), maxDistance);
+                    }
+
+                    float powerMultiplier = 0.25f;
+                    Vector2 acceleration = Vector2Scale(Vector2Normalize(direction), distance * powerMultiplier);
+
+                    selectedCircle->velocity = acceleration;
+
+                    // Применяем крученый удар если выбран тип
+                    bool anySpinActive = false;
+                    for (int i = 0; i < 4; i++) {
+                        if (spinActive[i]) {
+                            anySpinActive = true;
+                            break;
+                        }
+                    }
+
+                    if (anySpinActive) {
+                        ApplySpin(*selectedCircle, direction, spinActive);
+                    }
+
+                    // В режиме пенальти после удара мяч нельзя больше перемещать
+                    if (currentGameMode == PENALTY) {
+                        selectedCircle->canMoveFreely = false;
+                    }
+                }
+                dragging = false;
+                selectedCircle = nullptr;
+            }
+
+            // Обновляем вратаря (управляется игроком)
+            UpdateGoalkeeper(goalkeeper, deltaTime);
+
+            for (auto& circle : circles) {
+                // ОБНОВЛЯЕМ КРУЧЕНИЕ МЯЧА ПЕРЕД ОБНОВЛЕНИЕМ ПОЗИЦИИ
+                UpdateSpin(circle, deltaTime);
+
+                circle.accelerate = Vector2Scale(circle.velocity, damping);
+                circle.velocity = Vector2Add(circle.velocity, circle.accelerate);
+                circle.position = Vector2Add(circle.position, circle.velocity);
+
+                // Проверяем столкновение с вратарем
+                HandleGoalkeeperCollision(circle, goalkeeper);
+
+                // Проверяем вылет за границы
+                if (IsCircleOutOfBounds(circle)) {
+                    ResetCircle(circle, currentGameMode);
+                    // При вылете мяча за границы очко получает вратарь
+                    if (goalkeeperController == 1) {
+                        player1Score++;
+                    }
+                    else {
+                        player2Score++;
+                    }
+                }
+
+                // Проверяем пересечение линии ворот (мимо ворот)
+                if (CheckGoalLineCrossing(circle, goal)) {
+                    ResetCircle(circle, currentGameMode);
+                    // При промахе очко получает вратарь
+                    if (goalkeeperController == 1) {
+                        player1Score++;
+                    }
+                    else {
+                        player2Score++;
+                    }
+                }
+
+                // Проверяем касание зеленой линии (гол)
+                if (CheckGreenLineTouch(circle, goal)) {
+                    // Гол! Очко получает бьющий (игрок 1)
+                    player1Score++;
+                    StartGoalAnimation(); // Запускаем анимацию гола
+                    ResetCircle(circle, currentGameMode);
+                }
+
+                // Проверяем касание ГОРИЗОНТАЛЬНЫХ белых линий СБОКУ ОТ ШТАНГ
+                if (CheckSideLinesCollision(circle, goal)) {
+                    ResetToHitPosition(circle, currentGameMode);
+                    // При касании боковых линий очко получает вратарь
+                    if (goalkeeperController == 1) {
+                        player1Score++;
+                    }
+                    else {
+                        player2Score++;
+                    }
+                }
+
+                // Обработка столкновений со стенами
+                HandleWallCollision(circle);
+
+                // Обработка столкновений с воротами (мяч отскакивает от штанг)
+                HandleGoalCollision(circle, goal);
+
+                // В режиме пенальти, если мяч почти остановился, возвращаем его на стартовую позицию
+                if (currentGameMode == PENALTY && !circle.canMoveFreely && Vector2Length(circle.velocity) < 10.0f) {
+                    ResetCircle(circle, currentGameMode);
+                }
             }
         }
         break;
@@ -1302,9 +1808,7 @@ int main()
             }
             break;
 
-        case COLLECTION:
-            // Коллекция - только просмотр
-            break;
+       
         }
 
         BeginDrawing();
@@ -1312,7 +1816,15 @@ int main()
 
         switch (gameState) {
         case MENU:
-            DrawMainMenu(playButton, shopButton, collectionButton, exitButton);
+            DrawMainMenu(playButton, twoPlayersButton, shopButton, collectionButton, exitButton);
+            break;
+
+        case TWO_PLAYERS_MENU:
+            DrawTwoPlayersMenu(player1KeeperButton, player2KeeperButton, backButton);
+            break;
+
+        case GAME_MODE_SELECTION:
+            DrawGameModeSelection(freeKickButton, penaltyButton, modeBackButton);
             break;
 
         case PLAYING:
@@ -1374,6 +1886,9 @@ int main()
             // Отрисовываем анимации (поверх всего)
             DrawAnimations();
 
+            // Отображаем режим игры
+            DrawGameModeInfo(currentGameMode);
+
             // Отображаем счет
             DrawText(TextFormat("Score: %d", score), 10, 10, 20, WHITE);
 
@@ -1395,6 +1910,88 @@ int main()
             if (slowMoActive) {
                 DrawText("SLOW MOTION", MAX_WIDTH - 150, 40, 20, ORANGE);
             }
+        }
+        break;
+
+        case TWO_PLAYERS_GAME:
+        {
+            // Координаты для линий на уровне низа штанг
+            float postBottomY = goal.position.y + goal.height / 2;
+            float leftPostX = goal.position.x - goal.width / 2;
+            float rightPostX = goal.position.x + goal.width / 2;
+
+            // Рисуем зеленую линию (выше желтой на 50 пикселей) - для гола
+            float greenLineY = postBottomY - 50.0f;
+            DrawLine(leftPostX, greenLineY, rightPostX, greenLineY, GREEN);
+
+            // Рисуем желтую линию на уровне низа штанг (горизонтальная)
+            DrawLine(leftPostX, postBottomY, rightPostX, postBottomY, WHITE);
+
+            // Рисуем ГОРИЗОНТАЛЬНЫЕ белые линии СБОКУ ОТ ШТАНГ (теперь прилегают к воротам)
+            // Левая ГОРИЗОНТАЛЬНАЯ белая линия СЛЕВА от левой штанги
+            DrawLine(0, postBottomY, leftPostX, postBottomY, WHITE);
+
+            // Правая ГОРИЗОНТАЛЬНАЯ белая линия СПРАВА от правой штанги
+            DrawLine(rightPostX, postBottomY, MAX_WIDTH, postBottomY, WHITE);
+
+            // Рисуем ворота (штангИ)
+            DrawGoal(goal);
+
+            // Рисуем вратаря (PNG текстура)
+            DrawGoalkeeper(goalkeeper);
+
+            // Рисуем круги
+            for (const auto& circle : circles) {
+                DrawCircleV(circle.position, circle.radius, WHITE);
+            }
+
+            // Рисуем шкалу силы, если перетаскиваем мяч
+            if (dragging && selectedCircle != nullptr) {
+                DrawPowerBar(*selectedCircle, mousePosition, dragging, spinActive);
+
+                // Рисуем линию от мяча к курсору
+                Color lineColor = WHITE;
+                int activeSpins = 0;
+                for (int i = 0; i < 4; i++) {
+                    if (spinActive[i]) activeSpins++;
+                }
+
+                if (activeSpins == 1) {
+                    if (spinActive[0]) lineColor = BLUE;
+                    else if (spinActive[1]) lineColor = RED;
+                    else if (spinActive[2]) lineColor = GREEN;
+                    else if (spinActive[3]) lineColor = YELLOW;
+                }
+                else if (activeSpins > 1) {
+                    lineColor = PURPLE;
+                }
+
+                DrawLineV(selectedCircle->position, mousePosition, lineColor);
+            }
+
+            // Отрисовываем анимации (поверх всего)
+            DrawAnimations();
+
+            // Отображаем режим игры
+            DrawGameModeInfo(currentGameMode);
+
+            // Отображаем счет двух игроков
+            DrawTwoPlayersScore(player1Score, player2Score);
+
+            // Отображаем управление
+            DrawText("PLAYER 1 (Shooter):", 10, MAX_HEIGHT - 160, 15, BLUE);
+            DrawText("WASD - Spin, Mouse - Aim/Shoot", 10, MAX_HEIGHT - 140, 15, BLUE);
+
+            if (goalkeeperController == 1) {
+                DrawText("PLAYER 1 (Goalkeeper):", 10, MAX_HEIGHT - 110, 15, BLUE);
+                DrawText("Arrows - Move, SPACE - Jump", 10, MAX_HEIGHT - 90, 15, BLUE);
+            }
+            else {
+                DrawText("PLAYER 2 (Goalkeeper):", MAX_WIDTH - 200, MAX_HEIGHT - 110, 15, RED);
+                DrawText("Arrows - Move, SPACE - Jump", MAX_WIDTH - 200, MAX_HEIGHT - 90, 15, RED);
+            }
+
+            DrawText("H - Back to Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
         }
         break;
 
