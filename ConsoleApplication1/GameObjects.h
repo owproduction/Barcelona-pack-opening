@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 
+
 const int MAX_WIDTH = 600;
 const int MAX_HEIGHT = 800;
 const float damping = -0.05f;
@@ -64,8 +65,7 @@ struct Circle {
 // Функции для создания объектов
 Goal CreateGoal(float width, float height, Vector2 position);
 Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const char* texturePath, int playerControlled = 0);
-int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
-    int minVelocity = 0, int maxVelocity = 0, int gameMode = 0);
+
 
 // Функции для работы с футболистами
 void LoadFootballers();

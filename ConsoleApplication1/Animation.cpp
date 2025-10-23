@@ -81,7 +81,7 @@ void AnimationSystem::StartGoalAnimation() {
     goalAnimation.active = true;
     goalAnimation.duration = 2.0f;
     goalAnimation.timer = goalAnimation.duration;
-    goalAnimation.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT / 2.0f };
+    goalAnimation.position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     goalAnimation.scale = 1.0f;
     goalAnimation.rotation = 0.0f;
     goalAnimation.color = YELLOW;
@@ -92,7 +92,7 @@ void AnimationSystem::StartPackAnimation(Texture2D playerTexture, const std::str
     packAnimation.active = true;
     packAnimation.duration = 3.0f;
     packAnimation.timer = packAnimation.duration;
-    packAnimation.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT / 2.0f };
+    packAnimation.position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     packAnimation.velocity = { 0, 0 };
     packAnimation.scale = 0.1f;
     packAnimation.rotation = 0.0f;

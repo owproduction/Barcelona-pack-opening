@@ -1,5 +1,47 @@
 #include "Game.h"
 
+
+int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
+    int minVelocity = 0, int maxVelocity = 0, GameMode mode = FREE_KICK) {
+    for (int i = 0; i < count; i++)
+    {
+        Vector2 velocity = {
+           GetRandomValue(minVelocity,maxVelocity),
+           GetRandomValue(minVelocity,maxVelocity)
+        };
+        Vector2 accelerate = { 0,0 };
+        float weight = radius / 3;
+
+        // Позиция мяча в зависимости от режима
+        Vector2 position;
+        if (mode == PENALTY) {
+            // Для пенальти - фиксированная позиция
+            position = {
+                MAX_WIDTH / 2.0f,
+                MAX_HEIGHT - 150.0f  // Фиксированная позиция для пенальти
+            };
+        }
+        else {
+            // Для свободного удара - начальная позиция как раньше
+            position = {
+                MAX_WIDTH / 2.0f,
+                MAX_HEIGHT / 2.0f + 100
+            };
+        }
+
+        Circle newCircle = { position,velocity,accelerate,radius,weight,position,position };
+        for (int j = 0; j < 4; j++) {
+            newCircle.hasSpin[j] = false;
+            newCircle.spinForce[j] = 0.0f;
+            newCircle.spinDirection[j] = { 0, 0 };
+        }
+        newCircle.controllingPlayer = 1; // По умолчанию управляет игрок 1
+        newCircle.canMoveFreely = (mode == FREE_KICK); // В свободном ударе можно перемещать мяч
+        circles.push_back(newCircle);
+    }
+    return count;
+}
+
 Game::Game() {
     InitWindow(MAX_WIDTH, MAX_HEIGHT, "Football Game");
     SetTargetFPS(60);
@@ -151,6 +193,7 @@ void Game::Render() {
         // Другие состояния...
     case GAME_MODE_SELECTION:
         // Отрисовка выбора режима игры
+        
         break;
 
     case SELECT_PLAYER:

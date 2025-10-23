@@ -127,11 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="ConsoleApplication1.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObjects.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="SaveSystem.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>

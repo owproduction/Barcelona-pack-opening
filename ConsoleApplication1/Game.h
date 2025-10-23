@@ -1,6 +1,5 @@
 #ifndef GAME_H
 #define GAME_H
-#pragma once
 
 #include "raylib.h"
 #include "GameObjects.h"
@@ -9,6 +8,7 @@
 #include "SaveSystem.h"
 #include "Collision.h"
 #include <vector>
+
 
 // Состояния игры
 enum GameState {
@@ -60,7 +60,7 @@ private:
 
     // Системы
     SaveSystem saveSystem;
-    AnimationSystem animationSystem;  // Исправлено: AnimationSystem вместо Animation
+    AnimationSystem animationSystem;
 
 public:
     Game();
