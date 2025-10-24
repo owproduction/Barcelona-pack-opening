@@ -1,405 +1,131 @@
 #include "Game.h"
+#include "GameObjects.h"
+#include "SaveSystem.h"
+#include "Animation.h"
+#include <iostream>
 
+// Глобальные переменные
+int coins = 0;
+std::vector<Footballer> footballers;
+Texture2D packTexture = { 0 };
+GameMode currentGameMode = FREE_KICK;
+int collectionPage = 0;
+int playersPerPage = 6;
 
-int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
-    int minVelocity = 0, int maxVelocity = 0, GameMode mode = FREE_KICK) {
-    for (int i = 0; i < count; i++)
-    {
-        Vector2 velocity = {
-           GetRandomValue(minVelocity,maxVelocity),
-           GetRandomValue(minVelocity,maxVelocity)
-        };
-        Vector2 accelerate = { 0,0 };
-        float weight = radius / 3;
+void LoadFootballers() {
+    footballers.clear();
 
-        // Позиция мяча в зависимости от режима
-        Vector2 position;
-        if (mode == PENALTY) {
-            // Для пенальти - фиксированная позиция
-            position = {
-                MAX_WIDTH / 2.0f,
-                MAX_HEIGHT - 150.0f  // Фиксированная позиция для пенальти
-            };
-        }
-        else {
-            // Для свободного удара - начальная позиция как раньше
-            position = {
-                MAX_WIDTH / 2.0f,
-                MAX_HEIGHT / 2.0f + 100
-            };
-        }
+    // Добавляем 15 футболистов (замени пути на свои PNG файлы)
+    Footballer f1;
+    f1.texture = LoadTexture("player1.png");
+    f1.name = "Messi";
+    f1.unlocked = false;
+    footballers.push_back(f1);
 
-        Circle newCircle = { position,velocity,accelerate,radius,weight,position,position };
-        for (int j = 0; j < 4; j++) {
-            newCircle.hasSpin[j] = false;
-            newCircle.spinForce[j] = 0.0f;
-            newCircle.spinDirection[j] = { 0, 0 };
-        }
-        newCircle.controllingPlayer = 1; // По умолчанию управляет игрок 1
-        newCircle.canMoveFreely = (mode == FREE_KICK); // В свободном ударе можно перемещать мяч
-        circles.push_back(newCircle);
-    }
-    return count;
+    Footballer f2;
+    f2.texture = LoadTexture("player2.png");
+    f2.name = "Ronaldo";
+    f2.unlocked = false;
+    footballers.push_back(f2);
+
+    Footballer f3;
+    f3.texture = LoadTexture("player3.png");
+    f3.name = "Neymar";
+    f3.unlocked = false;
+    footballers.push_back(f3);
+
+    Footballer f4;
+    f4.texture = LoadTexture("player4.png");
+    f4.name = "Mbappe";
+    f4.unlocked = false;
+    footballers.push_back(f4);
+
+    Footballer f5;
+    f5.texture = LoadTexture("player5.png");
+    f5.name = "Haaland";
+    f5.unlocked = false;
+    footballers.push_back(f5);
+
+    // Добавляем еще 10 футболистов
+    Footballer f6;
+    f6.texture = LoadTexture("player6.png");
+    f6.name = "Lewandowski";
+    f6.unlocked = false;
+    footballers.push_back(f6);
+
+    Footballer f7;
+    f7.texture = LoadTexture("player7.png");
+    f7.name = "Benzema";
+    f7.unlocked = false;
+    footballers.push_back(f7);
+
+    Footballer f8;
+    f8.texture = LoadTexture("player8.png");
+    f8.name = "Salah";
+    f8.unlocked = false;
+    footballers.push_back(f8);
+
+    Footballer f9;
+    f9.texture = LoadTexture("player9.png");
+    f9.name = "Kane";
+    f9.unlocked = false;
+    footballers.push_back(f9);
+
+    Footballer f10;
+    f10.texture = LoadTexture("player10.png");
+    f10.name = "De Bruyne";
+    f10.unlocked = false;
+    footballers.push_back(f10);
+
+    Footballer f11;
+    f11.texture = LoadTexture("player11.png");
+    f11.name = "Modric";
+    f11.unlocked = false;
+    footballers.push_back(f11);
+
+    Footballer f12;
+    f12.texture = LoadTexture("player12.png");
+    f12.name = "Van Dijk";
+    f12.unlocked = false;
+    footballers.push_back(f12);
+
+    Footballer f13;
+    f13.texture = LoadTexture("player13.png");
+    f13.name = "Courtois";
+    f13.unlocked = false;
+    footballers.push_back(f13);
+
+    Footballer f14;
+    f14.texture = LoadTexture("player14.png");
+    f14.name = "Son";
+    f14.unlocked = false;
+    footballers.push_back(f14);
+
+    Footballer f15;
+    f15.texture = LoadTexture("player15.png");
+    f15.name = "Zlatan";
+    f15.unlocked = false;
+    footballers.push_back(f15);
 }
 
-Game::Game() {
-    InitWindow(MAX_WIDTH, MAX_HEIGHT, "Football Game");
-    SetTargetFPS(60);
+void OpenPack() {
+    if (coins >= 10) {
+        coins -= 10;
 
-    // Инициализация объектов
-    goal = CreateGoal(200.0f, 100.0f, { MAX_WIDTH / 2.0f, 150.0f });
-    goalkeeper = CreateGoalkeeper(80.0f, 60.0f, { MAX_WIDTH / 2.0f, goal.position.y + 20.0f }, "goalkeeper.png");
+        // Сохраняем прогресс после траты монет
+        SaveProgress();
 
-    // Инициализация UI
-    playButton = CreateButton(MAX_WIDTH / 2 - 100, 200, 200, 50, "1 PLAYER", BLUE, WHITE);
-    twoPlayersButton = CreateButton(MAX_WIDTH / 2 - 100, 270, 200, 50, "2 PLAYERS", GREEN, WHITE);
-    shopButton = CreateButton(MAX_WIDTH / 2 - 100, 340, 200, 50, "SHOP", PURPLE, WHITE);
-    collectionButton = CreateButton(MAX_WIDTH / 2 - 100, 410, 200, 50, "COLLECTION", ORANGE, WHITE);
-    exitButton = CreateButton(MAX_WIDTH / 2 - 100, 480, 200, 50, "EXIT", RED, WHITE);
+        // Случайный выбор футболиста
+        int randomIndex = GetRandomValue(0, footballers.size() - 1);
 
-    player1KeeperButton = CreateButton(MAX_WIDTH / 2 - 150, 200, 300, 50, "PLAYER 1 - KEEPER", BLUE, WHITE);
-    player2KeeperButton = CreateButton(MAX_WIDTH / 2 - 150, 270, 300, 50, "PLAYER 2 - KEEPER", RED, WHITE);
-    backButton = CreateButton(MAX_WIDTH / 2 - 150, 340, 300, 50, "BACK", GRAY, WHITE);
+        // Проверяем, был ли уже разблокирован этот футболист
+        bool wasUnlocked = footballers[randomIndex].unlocked;
+        footballers[randomIndex].unlocked = true;
 
-    freeKickButton = CreateButton(MAX_WIDTH / 2 - 150, 350, 300, 50, "FREE KICK", GREEN, WHITE);
-    penaltyButton = CreateButton(MAX_WIDTH / 2 - 150, 420, 300, 50, "PENALTY", YELLOW, WHITE);
-    modeBackButton = CreateButton(MAX_WIDTH / 2 - 150, 490, 300, 50, "BACK", GRAY, WHITE);
+        // Запускаем анимацию открытия пака
+        StartPackAnimation(footballers[randomIndex].texture, footballers[randomIndex].name);
 
-    // Загрузка данных
-    saveSystem.LoadProgress();
-    LoadFootballers();
-
-    // Выбор первого разблокированного игрока
-    for (int i = 0; i < footballers.size(); i++) {
-        if (footballers[i].unlocked) {
-            selectedPlayerIndex = i;
-            break;
-        }
+        // Сохраняем прогресс после разблокировки футболиста
+        SaveProgress();
     }
-}
-
-void Game::Run() {
-    while (!WindowShouldClose()) {
-        float rawDeltaTime = GetFrameTime();
-        float deltaTime = slowMoActive ? rawDeltaTime * slowMoFactor : rawDeltaTime;
-
-        HandleInput();
-        Update(deltaTime);
-        Render();
-    }
-
-    saveSystem.SaveProgress();
-    CloseWindow();
-}
-
-void Game::Update(float deltaTime) {
-    animationSystem.UpdateAnimations(deltaTime); // Исправлено: правильный вызов
-
-    switch (gameState) {
-    case PLAYING:
-    case TWO_PLAYERS_GAME:
-        UpdateGoalkeeper(goalkeeper, deltaTime);
-
-        // Обработка столкновений между кругами
-        std::vector<std::pair<Circle*, Circle*>> collisions;
-        for (int i = 0; i < circles.size() - 1; ++i) {
-            for (int j = i + 1; j < circles.size(); ++j) {
-                HandleCollision(collisions, circles[i], circles[j]);
-            }
-        }
-        for (auto& collision : collisions) {
-            DynamicCollisionResolution(*collision.first, *collision.second);
-        }
-
-        for (auto& circle : circles) {
-            UpdateSpin(circle, deltaTime);
-            circle.accelerate = Vector2Scale(circle.velocity, damping);
-            circle.velocity = Vector2Add(circle.velocity, circle.accelerate);
-            circle.position = Vector2Add(circle.position, circle.velocity);
-
-            // Обработка столкновений и игровой логики
-            HandleGoalkeeperCollision(circle, goalkeeper);
-            HandleWallCollision(circle);
-            HandleGoalCollision(circle, goal);
-
-            if (IsCircleOutOfBounds(circle)) {
-                ResetCircle(circle, currentGameMode);
-            }
-
-            if (CheckGoalLineCrossing(circle, goal)) {
-                ResetCircle(circle, currentGameMode);
-            }
-
-            if (CheckGreenLineTouch(circle, goal)) {
-                score++;
-                saveSystem.AddCoins(1);
-                animationSystem.StartGoalAnimation(); // Исправлено: правильный вызов
-                ResetCircle(circle, currentGameMode);
-            }
-
-            if (CheckSideLinesCollision(circle, goal)) {
-                ResetToHitPosition(circle, currentGameMode);
-            }
-        }
-        break;
-    }
-}
-
-void Game::Render() {
-    BeginDrawing();
-    ClearBackground(DARKGREEN);
-
-    switch (gameState) {
-    case MENU:
-        DrawMainMenu(playButton, twoPlayersButton, shopButton, collectionButton, exitButton, saveSystem.GetCoins());
-        break;
-
-    case PLAYING:
-        // Отрисовка игрового поля
-        DrawGameField(goal);
-        DrawGoalkeeper(goalkeeper);
-
-        for (const auto& circle : circles) {
-            DrawCircleV(circle.position, circle.radius, WHITE);
-        }
-
-        if (dragging && selectedCircle != nullptr) {
-            DrawPowerBar(*selectedCircle, GetMousePosition(), dragging, spinActive);
-            DrawDirectionArrow(*selectedCircle, GetMousePosition(), dragging, spinActive);
-        }
-
-        animationSystem.DrawAnimations(); // Исправлено: правильный вызов
-        DrawGameHUD(score, saveSystem.GetCoins(), currentGameMode, slowMoActive, spinActive, selectedPlayerIndex);
-        break;
-
-    case TWO_PLAYERS_GAME:
-        // Аналогично PLAYING, но с другим HUD
-        DrawGameField(goal);
-        DrawGoalkeeper(goalkeeper);
-
-        for (const auto& circle : circles) {
-            DrawCircleV(circle.position, circle.radius, WHITE);
-        }
-
-        if (dragging && selectedCircle != nullptr) {
-            DrawPowerBar(*selectedCircle, GetMousePosition(), dragging, spinActive);
-            DrawDirectionArrow(*selectedCircle, GetMousePosition(), dragging, spinActive);
-        }
-
-        animationSystem.DrawAnimations();
-        // Здесь будет другой HUD для двух игроков
-        break;
-
-        // Другие состояния...
-    case GAME_MODE_SELECTION:
-        // Отрисовка выбора режима игры
-        
-        break;
-
-    case SELECT_PLAYER:
-        // Отрисовка выбора игрока
-        break;
-
-    case SHOP:
-        // Отрисовка магазина
-        break;
-
-    case COLLECTION:
-        // Отрисовка коллекции
-        break;
-
-    case TWO_PLAYERS_MENU:
-        // Отрисовка меню двух игроков
-        break;
-    }
-
-    EndDrawing();
-}
-
-void Game::HandleInput() {
-    Vector2 mousePosition = GetMousePosition();
-
-    if (IsKeyPressed(KEY_H)) {
-        // Обработка возврата в меню
-        if (gameState == PLAYING || gameState == TWO_PLAYERS_GAME) {
-            gameState = GAME_MODE_SELECTION;
-        }
-        else if (gameState == GAME_MODE_SELECTION) {
-            if (isSinglePlayer) {
-                gameState = MENU;
-            }
-            else {
-                gameState = TWO_PLAYERS_MENU;
-            }
-        }
-        else if (gameState == TWO_PLAYERS_MENU) {
-            gameState = MENU;
-        }
-        else {
-            gameState = MENU;
-        }
-        slowMoActive = false;
-    }
-
-    // Обработка сброса прогресса (для тестирования)
-    if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_R)) {
-        saveSystem.ResetProgress();
-        saveSystem.LoadProgress();
-    }
-
-    switch (gameState) {
-    case MENU:
-        if (IsButtonClicked(playButton)) {
-            gameState = SELECT_PLAYER;
-            isSinglePlayer = true;
-            score = 0;
-            goalkeeper.playerControlled = 0;
-        }
-        if (IsButtonClicked(twoPlayersButton)) {
-            gameState = TWO_PLAYERS_MENU;
-            isSinglePlayer = false;
-            player1Score = 0;
-            player2Score = 0;
-        }
-        if (IsButtonClicked(shopButton)) {
-            gameState = SHOP;
-        }
-        if (IsButtonClicked(collectionButton)) {
-            gameState = COLLECTION;
-            collectionPage = 0;
-        }
-        if (IsButtonClicked(exitButton)) {
-            saveSystem.SaveProgress();
-            CloseWindow();
-        }
-        break;
-
-    case GAME_MODE_SELECTION:
-        if (IsButtonClicked(freeKickButton)) {
-            currentGameMode = FREE_KICK;
-            circles.clear();
-            GenerateCircles(circles, 1, 15.0f, 0, 0, currentGameMode);
-
-            if (isSinglePlayer) {
-                gameState = PLAYING;
-            }
-            else {
-                gameState = TWO_PLAYERS_GAME;
-            }
-        }
-        if (IsButtonClicked(penaltyButton)) {
-            currentGameMode = PENALTY;
-            circles.clear();
-            GenerateCircles(circles, 1, 15.0f, 0, 0, currentGameMode);
-
-            if (isSinglePlayer) {
-                gameState = PLAYING;
-            }
-            else {
-                gameState = TWO_PLAYERS_GAME;
-            }
-        }
-        if (IsButtonClicked(modeBackButton)) {
-            if (isSinglePlayer) {
-                gameState = SELECT_PLAYER;
-            }
-            else {
-                gameState = TWO_PLAYERS_MENU;
-            }
-        }
-        break;
-
-    case PLAYING:
-        // Обработка ввода для игры
-        spinActive[0] = IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT);
-        spinActive[1] = IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT);
-        spinActive[2] = IsKeyDown(KEY_W) || IsKeyDown(KEY_UP);
-        spinActive[3] = IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN);
-
-        if (IsKeyPressed(KEY_SPACE)) {
-            slowMoActive = !slowMoActive;
-        }
-
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            for (auto& circle : circles) {
-                if (currentGameMode == PENALTY && !circle.canMoveFreely) continue;
-
-                if (CheckCollisionPointCircle(mousePosition, circle.position, circle.radius)) {
-                    dragging = true;
-                    selectedCircle = &circle;
-                    dragStartPosition = mousePosition;
-                    circle.hitPosition = circle.position;
-                    break;
-                }
-            }
-        }
-
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && selectedCircle != nullptr) {
-            Vector2 direction = Vector2Subtract(selectedCircle->position, mousePosition);
-            float distance = Vector2Length(direction);
-            float maxDistance = 150.0f;
-
-            if (distance > maxDistance) {
-                distance = maxDistance;
-                direction = Vector2Scale(Vector2Normalize(direction), maxDistance);
-            }
-
-            Vector2 acceleration = Vector2Scale(Vector2Normalize(direction), distance * 0.25f);
-            selectedCircle->velocity = acceleration;
-
-            bool anySpinActive = false;
-            for (int i = 0; i < 4; i++) {
-                if (spinActive[i]) {
-                    anySpinActive = true;
-                    break;
-                }
-            }
-
-            if (anySpinActive) {
-                ApplySpin(*selectedCircle, direction, spinActive);
-            }
-
-            if (goalkeeper.playerControlled == 0) {
-                MakeGoalkeeperJump(goalkeeper);
-            }
-
-            if (currentGameMode == PENALTY) {
-                selectedCircle->canMoveFreely = false;
-            }
-
-            dragging = false;
-            selectedCircle = nullptr;
-        }
-        break;
-
-        // Другие состояния...
-    case TWO_PLAYERS_MENU:
-        if (IsButtonClicked(player1KeeperButton)) {
-            gameState = GAME_MODE_SELECTION;
-            goalkeeperController = 1;
-            goalkeeper.playerControlled = 1;
-        }
-        if (IsButtonClicked(player2KeeperButton)) {
-            gameState = GAME_MODE_SELECTION;
-            goalkeeperController = 2;
-            goalkeeper.playerControlled = 2;
-        }
-        if (IsButtonClicked(backButton)) {
-            gameState = MENU;
-        }
-        break;
-    }
-}
-
-void Game::ResetGame() {
-    circles.clear();
-    GenerateCircles(circles, 1, 15.0f, 0, 0, currentGameMode);
-    score = 0;
-    player1Score = 0;
-    player2Score = 0;
-}
-
-void Game::SwitchToGameModeSelection(bool singlePlayer) {
-    isSinglePlayer = singlePlayer;
-    gameState = GAME_MODE_SELECTION;
 }

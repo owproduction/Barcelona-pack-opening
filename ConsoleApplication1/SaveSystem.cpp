@@ -1,48 +1,41 @@
 #include "SaveSystem.h"
+#include "Game.h"
 #include <fstream>
 
-SaveSystem::SaveSystem() {
-    footballersRef = &footballers;
-}
-
-void SaveSystem::SetFootballersReference(std::vector<Footballer>* footballers) {
-    footballersRef = footballers;
-}
-
-void SaveSystem::SaveProgress() {
+void SaveProgress() {
     std::ofstream file("save.dat", std::ios::binary);
     if (file.is_open()) {
+        // Сохраняем количество монет
         file.write(reinterpret_cast<const char*>(&coins), sizeof(coins));
-        for (const auto& footballer : *footballersRef) {
+
+        // Сохраняем состояние разблокировки футболистов
+        for (const auto& footballer : footballers) {
             file.write(reinterpret_cast<const char*>(&footballer.unlocked), sizeof(bool));
         }
+
         file.close();
     }
 }
 
-void SaveSystem::LoadProgress() {
+void LoadProgress() {
     std::ifstream file("save.dat", std::ios::binary);
     if (file.is_open()) {
+        // Загружаем количество монет
         file.read(reinterpret_cast<char*>(&coins), sizeof(coins));
-        for (auto& footballer : *footballersRef) {
+
+        // Загружаем состояние разблокировки футболистов
+        for (auto& footballer : footballers) {
             file.read(reinterpret_cast<char*>(&footballer.unlocked), sizeof(bool));
         }
+
         file.close();
     }
 }
 
-void SaveSystem::ResetProgress() {
+void ResetProgress() {
     coins = 0;
-    for (auto& footballer : *footballersRef) {
+    for (auto& footballer : footballers) {
         footballer.unlocked = false;
     }
     SaveProgress();
-}
-
-void SaveSystem::AddCoins(int amount) {
-    coins += amount;
-}
-
-int SaveSystem::GetCoins() const {
-    return coins;
 }

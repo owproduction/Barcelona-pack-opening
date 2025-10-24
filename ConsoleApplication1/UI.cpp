@@ -1,14 +1,5 @@
 #include "UI.h"
 
-Button CreateButton(float x, float y, float width, float height, const char* text, Color color, Color textColor) {
-    Button button;
-    button.bounds = { x, y, width, height };
-    button.text = text;
-    button.color = color;
-    button.textColor = textColor;
-    return button;
-}
-
 bool IsButtonClicked(Button button) {
     return CheckCollisionPointRec(GetMousePosition(), button.bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }
@@ -17,6 +8,7 @@ void DrawButton(Button button) {
     DrawRectangleRec(button.bounds, button.color);
     DrawRectangleLinesEx(button.bounds, 2, WHITE);
 
+    // Центрирование текста
     int textWidth = MeasureText(button.text, 20);
     int textHeight = 20;
     DrawText(button.text,
@@ -25,60 +17,47 @@ void DrawButton(Button button) {
         20, button.textColor);
 }
 
-void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton,
-    Button collectionButton, Button exitButton, int coins) {
-    DrawText("FOOTBALL GAME", MAX_WIDTH / 2 - MeasureText("FOOTBALL GAME", 40) / 2, 100, 40, WHITE);
-    DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 160, 30, GOLD);
-
-    DrawButton(playButton);
-    DrawButton(twoPlayersButton);
-    DrawButton(shopButton);
-    DrawButton(collectionButton);
-    DrawButton(exitButton);
+void DrawGoal(const Goal& goal) {
+    // Рисуем левую штангу
+    DrawRectangleRec(goal.leftPost, WHITE);
+    // Рисуем правую штангу
+    DrawRectangleRec(goal.rightPost, WHITE);
+    // Рисуем перекладину
+    DrawRectangleRec(goal.crossbar, WHITE);
 }
 
-void DrawGameHUD(int score, int coins, int gameMode, bool slowMoActive, bool spinActive[4], int selectedPlayerIndex) {
-    // Отображение счета
-    DrawText(TextFormat("Score: %d", score), 10, 10, 20, WHITE);
-    DrawText(TextFormat("Coins: %d", coins), 10, 40, 20, GOLD);
-
-    // Отображение режима игры
-    const char* modeText = (gameMode == 0) ? "FREE KICK" : "PENALTY";
-    Color modeColor = (gameMode == 0) ? GREEN : YELLOW;
-    DrawText(TextFormat("MODE: %s", modeText), MAX_WIDTH / 2 - MeasureText(TextFormat("MODE: %s", modeText), 20) / 2, 70, 20, modeColor);
-
-    // Отображение выбранного игрока
-    if (selectedPlayerIndex >= 0 && selectedPlayerIndex < footballers.size()) {
-        DrawText(TextFormat("PLAYER: %s", footballers[selectedPlayerIndex].name.c_str()),
-            MAX_WIDTH / 2 - MeasureText(TextFormat("PLAYER: %s", footballers[selectedPlayerIndex].name.c_str()), 20) / 2,
-            40, 20, GREEN);
+void DrawGoalkeeper(const Goalkeeper& keeper) {
+    if (keeper.texture.id != 0) {
+        // Рисуем текстуру вратаря
+        Rectangle sourceRec = { 0, 0, (float)keeper.texture.width, (float)keeper.texture.height };
+        Rectangle destRec = { keeper.position.x, keeper.position.y, keeper.width, keeper.height };
+        Vector2 origin = { keeper.width / 2, keeper.height / 2 };
+        DrawTexturePro(keeper.texture, sourceRec, destRec, origin, 0, WHITE);
     }
-
-    // Подсказки управления
-    DrawText("A/LEFT - Left Spin", 10, MAX_HEIGHT - 140, 15, spinActive[0] ? BLUE : WHITE);
-    DrawText("D/RIGHT - Right Spin", 10, MAX_HEIGHT - 120, 15, spinActive[1] ? RED : WHITE);
-    DrawText("W/UP - Top Spin", 10, MAX_HEIGHT - 100, 15, spinActive[2] ? GREEN : WHITE);
-    DrawText("S/DOWN - Back Spin", 10, MAX_HEIGHT - 80, 15, spinActive[3] ? YELLOW : WHITE);
-    DrawText("SPACE - Slow Motion", 10, MAX_HEIGHT - 60, 15, slowMoActive ? ORANGE : WHITE);
-    DrawText("H - Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
-
-    if (slowMoActive) {
-        DrawText("SLOW MOTION", MAX_WIDTH - 150, 40, 20, ORANGE);
+    else {
+        // Резервный вариант - оранжевый прямоугольник
+        DrawRectangleRec(keeper.bounds, ORANGE);
     }
 }
 
 void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDragging, bool spinActive[4]) {
     if (isDragging) {
+        // Вычисляем расстояние между мячом и курсором
         float distance = Vector2Distance(circle.position, mousePosition);
+
+        // Ограничиваем максимальную дистанцию для лучшего визуального отображения
         float maxDistance = 150.0f;
         float power = (distance > maxDistance) ? 1.0f : distance / maxDistance;
 
+        // Позиция шкалы (над мячом)
         Vector2 barPosition = { circle.position.x - 50, circle.position.y - 40 };
         float barWidth = 100.0f;
         float barHeight = 10.0f;
 
+        // Рисуем фон шкалы
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth, barHeight }, GRAY);
 
+        // Определяем цвет и тип удара на основе активных кручений
         Color fillColor = WHITE;
         std::string shotType = "NORMAL SHOT";
 
@@ -98,81 +77,176 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
             shotType = "COMBO SPIN";
         }
 
+        // Рисуем заполнение шкалы (цвет зависит от типа удара)
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth * power, barHeight }, fillColor);
+
+        // Рисуем контур шкалы
         DrawRectangleLines(barPosition.x, barPosition.y, barWidth, barHeight, WHITE);
+
+        // Отображаем тип удара
         DrawText(shotType.c_str(), barPosition.x, barPosition.y - 20, 15, fillColor);
     }
 }
 
-void DrawDirectionArrow(const Circle& circle, const Vector2& mousePosition, bool isDragging, bool spinActive[4]) {
-    if (isDragging) {
-        Vector2 direction = Vector2Subtract(mousePosition, circle.position);
-        direction = Vector2Normalize(direction);
+void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton, Button collectionButton, Button exitButton) {
+    // Заголовок
+    DrawText("FOOTBALL GAME", MAX_WIDTH / 2 - MeasureText("FOOTBALL GAME", 40) / 2, 100, 40, WHITE);
 
-        Vector2 arrowPos = {
-            circle.position.x + direction.x * (circle.radius + 20),
-            circle.position.y + direction.y * (circle.radius + 20)
-        };
+    // Отображаем количество монеток
+    DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 160, 30, GOLD);
 
-        float distance = Vector2Distance(circle.position, mousePosition);
-        float arrowLength = 15.0f + (distance / 150.0f) * 10.0f;
-
-        Color arrowColor = WHITE;
-        int activeSpins = 0;
-        for (int i = 0; i < 4; i++) {
-            if (spinActive[i]) activeSpins++;
-        }
-
-        if (activeSpins == 1) {
-            if (spinActive[0]) arrowColor = BLUE;
-            else if (spinActive[1]) arrowColor = RED;
-            else if (spinActive[2]) arrowColor = GREEN;
-            else if (spinActive[3]) arrowColor = YELLOW;
-        }
-        else if (activeSpins > 1) {
-            arrowColor = PURPLE;
-        }
-
-        Vector2 arrowEnd = {
-            arrowPos.x + direction.x * arrowLength,
-            arrowPos.y + direction.y * arrowLength
-        };
-
-        DrawLineEx(arrowPos, arrowEnd, 3, arrowColor);
-
-        Vector2 perp = { -direction.y, direction.x };
-        Vector2 arrowTip1 = {
-            arrowEnd.x - direction.x * 8 + perp.x * 4,
-            arrowEnd.y - direction.y * 8 + perp.y * 4
-        };
-        Vector2 arrowTip2 = {
-            arrowEnd.x - direction.x * 8 - perp.x * 4,
-            arrowEnd.y - direction.y * 8 - perp.y * 4
-        };
-
-        DrawLineEx(arrowEnd, arrowTip1, 3, arrowColor);
-        DrawLineEx(arrowEnd, arrowTip2, 3, arrowColor);
-    }
+    // Кнопки
+    DrawButton(playButton);
+    DrawButton(twoPlayersButton);
+    DrawButton(shopButton);
+    DrawButton(collectionButton);
+    DrawButton(exitButton);
 }
 
-void DrawGameField(const Goal& goal) {
-    float postBottomY = goal.position.y + goal.height / 2;
-    float leftPostX = goal.position.x - goal.width / 2;
-    float rightPostX = goal.position.x + goal.width / 2;
+void DrawTwoPlayersMenu(Button player1KeeperButton, Button player2KeeperButton, Button backButton) {
+    DrawText("2 PLAYERS MODE", MAX_WIDTH / 2 - MeasureText("2 PLAYERS MODE", 40) / 2, 100, 40, WHITE);
+    DrawText("Choose who controls goalkeeper:", MAX_WIDTH / 2 - MeasureText("Choose who controls goalkeeper:", 25) / 2, 160, 25, WHITE);
 
-    // Зеленая линия для гола
-    float greenLineY = postBottomY - 50.0f;
-    DrawLine(leftPostX, greenLineY, rightPostX, greenLineY, GREEN);
+    DrawButton(player1KeeperButton);
+    DrawButton(player2KeeperButton);
+    DrawButton(backButton);
+}
 
-    // Желтая линия
-    DrawLine(leftPostX, postBottomY, rightPostX, postBottomY, WHITE);
+void DrawGameModeSelection(Button freeKickButton, Button penaltyButton, Button backButton) {
+    DrawText("SELECT GAME MODE", MAX_WIDTH / 2 - MeasureText("SELECT GAME MODE", 40) / 2, 100, 40, WHITE);
 
-    // Боковые линии
-    DrawLine(0, postBottomY, leftPostX, postBottomY, WHITE);
-    DrawLine(rightPostX, postBottomY, MAX_WIDTH, postBottomY, WHITE);
+    DrawText("FREE KICK:", MAX_WIDTH / 2 - MeasureText("FREE KICK:", 25) / 2, 170, 25, GREEN);
+    DrawText("- Move ball anywhere", MAX_WIDTH / 2 - MeasureText("- Move ball anywhere", 20) / 2, 200, 20, WHITE);
+    DrawText("- Multiple shots allowed", MAX_WIDTH / 2 - MeasureText("- Multiple shots allowed", 20) / 2, 225, 20, WHITE);
 
-    // Ворота
-    DrawRectangleRec(goal.leftPost, WHITE);
-    DrawRectangleRec(goal.rightPost, WHITE);
-    DrawRectangleRec(goal.crossbar, WHITE);
+    DrawText("PENALTY:", MAX_WIDTH / 2 - MeasureText("PENALTY:", 25) / 2, 270, 25, YELLOW);
+    DrawText("- Fixed ball position", MAX_WIDTH / 2 - MeasureText("- Fixed ball position", 20) / 2, 300, 20, WHITE);
+    DrawText("- One shot per round", MAX_WIDTH / 2 - MeasureText("- One shot per round", 20) / 2, 325, 20, WHITE);
+
+    DrawButton(freeKickButton);
+    DrawButton(penaltyButton);
+    DrawButton(backButton);
+}
+
+void DrawShop() {
+    DrawText("SHOP", MAX_WIDTH / 2 - MeasureText("SHOP", 40) / 2, 50, 40, WHITE);
+    DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 100, 30, GOLD);
+
+    // Отображаем пак
+    if (packTexture.id != 0) {
+        Rectangle packRect = { MAX_WIDTH / 2 - 100, 150, 200, 200 };
+        DrawTexturePro(packTexture, { 0, 0, (float)packTexture.width, (float)packTexture.height },
+            packRect, { 0, 0 }, 0, WHITE);
+
+        // Цена пака
+        DrawText("10 coins", MAX_WIDTH / 2 - MeasureText("10 coins", 25) / 2, 370, 25, GOLD);
+
+        // Кнопка покупки
+        if (coins >= 10) {
+            DrawText("CLICK TO BUY", MAX_WIDTH / 2 - MeasureText("CLICK TO BUY", 20) / 2, 400, 20, GREEN);
+        }
+        else {
+            DrawText("NOT ENOUGH COINS", MAX_WIDTH / 2 - MeasureText("NOT ENOUGH COINS", 20) / 2, 400, 20, RED);
+        }
+
+        // Информация о коллекции
+        int unlockedCount = 0;
+        for (const auto& footballer : footballers) {
+            if (footballer.unlocked) unlockedCount++;
+        }
+        DrawText(TextFormat("Collection: %d/%d", unlockedCount, footballers.size()),
+            MAX_WIDTH / 2 - MeasureText(TextFormat("Collection: %d/%d", unlockedCount, footballers.size()), 20) / 2,
+            430, 20, WHITE);
+    }
+
+    DrawText("H - Back to Menu", 10, MAX_HEIGHT - 30, 20, WHITE);
+}
+
+void DrawCollection() {
+    DrawText("COLLECTION", MAX_WIDTH / 2 - MeasureText("COLLECTION", 40) / 2, 50, 40, WHITE);
+
+    int unlockedCount = 0;
+    for (const auto& footballer : footballers) {
+        if (footballer.unlocked) unlockedCount++;
+    }
+
+    DrawText(TextFormat("Unlocked: %d/%d", unlockedCount, footballers.size()),
+        MAX_WIDTH / 2 - MeasureText(TextFormat("Unlocked: %d/%d", unlockedCount, footballers.size()), 25) / 2,
+        100, 25, WHITE);
+
+    // Отображаем номер страницы
+    int totalPages = (footballers.size() + playersPerPage - 1) / playersPerPage;
+    DrawText(TextFormat("Page %d/%d", collectionPage + 1, totalPages),
+        MAX_WIDTH / 2 - MeasureText(TextFormat("Page %d/%d", collectionPage + 1, totalPages), 20) / 2,
+        130, 20, WHITE);
+
+    // Отображаем футболистов с БОЛЬШИМИ КАРТОЧКАМИ
+    float startX = 50;
+    float startY = 170;
+    float cardWidth = 160;  // БОЛЬШАЯ ШИРИНА КАРТОЧКИ
+    float cardHeight = 200; // БОЛЬШАЯ ВЫСОТА КАРТОЧКИ
+    float spacingX = 180;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО X
+    float spacingY = 220;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО Y
+
+    int startIndex = collectionPage * playersPerPage;
+    int endIndex = startIndex + playersPerPage;
+    if (endIndex > footballers.size()) endIndex = footballers.size();
+
+    for (int i = startIndex; i < endIndex; i++) {
+        int indexOnPage = i - startIndex;
+        float x = startX + (indexOnPage % 3) * spacingX;
+        float y = startY + (indexOnPage / 3) * spacingY;
+
+        if (footballers[i].unlocked) {
+            // Отображаем разблокированного футболиста
+            if (footballers[i].texture.id != 0) {
+                Rectangle playerRect = { x, y, cardWidth, cardHeight - 40 };
+                DrawTexturePro(footballers[i].texture, { 0, 0, (float)footballers[i].texture.width, (float)footballers[i].texture.height },
+                    playerRect, { 0, 0 }, 0, WHITE);
+
+                // Рамка вокруг карточки
+                DrawRectangleLinesEx(playerRect, 2, GREEN);
+            }
+
+            // Имя футболиста под картинкой
+            DrawText(footballers[i].name.c_str(),
+                x + cardWidth / 2 - MeasureText(footballers[i].name.c_str(), 20) / 2,
+                y + cardHeight - 35, 20, GREEN);
+        }
+        else {
+            // Отображаем заблокированного футболиста
+            Rectangle cardRect = { x, y, cardWidth, cardHeight - 40 };
+            DrawRectangleRec(cardRect, DARKGRAY);
+            DrawRectangleLinesEx(cardRect, 2, GRAY);
+
+            DrawText("???", x + cardWidth / 2 - MeasureText("???", 25) / 2, y + (cardHeight - 40) / 2 - 12, 25, WHITE);
+
+            // Текст "LOCKED" под картинкой
+            DrawText("LOCKED",
+                x + cardWidth / 2 - MeasureText("LOCKED", 18) / 2,
+                y + cardHeight - 35, 18, GRAY);
+        }
+    }
+
+    // Кнопки перелистывания страниц
+    if (collectionPage > 0) {
+        DrawText("<< PREV", 20, MAX_HEIGHT - 40, 20, WHITE);
+    }
+    if ((collectionPage + 1) * playersPerPage < footballers.size()) {
+        DrawText("NEXT >>", MAX_WIDTH - 100, MAX_HEIGHT - 40, 20, WHITE);
+    }
+
+    DrawText("H - Back to Menu", 10, MAX_HEIGHT - 70, 20, WHITE);
+}
+
+void DrawTwoPlayersScore(int player1Score, int player2Score) {
+    DrawText(TextFormat("PLAYER 1: %d", player1Score), 10, 10, 20, BLUE);
+    DrawText(TextFormat("PLAYER 2: %d", player2Score), MAX_WIDTH - 150, 10, 20, RED);
+}
+
+void DrawGameModeInfo(GameMode mode) {
+    const char* modeText = (mode == FREE_KICK) ? "FREE KICK" : "PENALTY";
+    Color modeColor = (mode == FREE_KICK) ? GREEN : YELLOW;
+
+    DrawText(TextFormat("MODE: %s", modeText), MAX_WIDTH / 2 - MeasureText(TextFormat("MODE: %s", modeText), 20) / 2, 70, 20, modeColor);
 }

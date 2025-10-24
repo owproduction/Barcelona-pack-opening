@@ -2,18 +2,17 @@
 #define GAME_H
 
 #include "raylib.h"
-#include "GameObjects.h"
-#include "UI.h"
-#include "Animation.h"
-#include "SaveSystem.h"
-#include "Collision.h"
+#include "raymath.h"
 #include <vector>
+#include <string>
 
+const int MAX_WIDTH = 600;
+const int MAX_HEIGHT = 800;
+const float damping = -0.05f;
 
 // Состояния игры
 enum GameState {
     MENU,
-    SELECT_PLAYER,
     PLAYING,
     SHOP,
     COLLECTION,
@@ -28,48 +27,25 @@ enum GameMode {
     PENALTY
 };
 
-class Game {
-private:
-    // Основные переменные
-    GameState gameState = MENU;
-    GameMode currentGameMode = FREE_KICK;
-    bool isSinglePlayer = true;
-    bool slowMoActive = false;
-    float slowMoFactor = 0.3f;
-
-    // Игровые объекты
-    std::vector<Circle> circles;
-    Goal goal;
-    Goalkeeper goalkeeper;
-
-    // UI элементы
-    Button playButton, twoPlayersButton, shopButton, collectionButton, exitButton;
-    Button player1KeeperButton, player2KeeperButton, backButton;
-    Button freeKickButton, penaltyButton, modeBackButton;
-
-    // Игровая логика
-    bool dragging = false;
-    Circle* selectedCircle = nullptr;
-    Vector2 dragStartPosition;
-    int score = 0;
-    int player1Score = 0, player2Score = 0;
-    bool spinActive[4] = { false, false, false, false };
-    int goalkeeperController = 0;
-    int selectedPlayerIndex = -1;
-    int collectionPage = 0;
-
-    // Системы
-    SaveSystem saveSystem;
-    AnimationSystem animationSystem;
-
-public:
-    Game();
-    void Run();
-    void Update(float deltaTime);
-    void Render();
-    void HandleInput();
-    void ResetGame();
-    void SwitchToGameModeSelection(bool singlePlayer);
+// Структура для футболиста
+struct Footballer {
+    Texture2D texture;
+    std::string name;
+    bool unlocked;
 };
+
+// Глобальные переменные
+extern int coins;
+extern std::vector<Footballer> footballers;
+extern Texture2D packTexture;
+extern GameMode currentGameMode;
+extern int collectionPage;
+extern int playersPerPage;
+
+// Функции игры
+void LoadFootballers();
+void OpenPack();
+void UpdateAnimations(float deltaTime);
+void DrawAnimations();
 
 #endif

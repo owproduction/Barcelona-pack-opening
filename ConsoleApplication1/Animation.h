@@ -2,6 +2,7 @@
 #define ANIMATION_H
 
 #include "raylib.h"
+#include "Game.h"  // Добавляем для MAX_WIDTH, MAX_HEIGHT
 #include <string>
 
 // Структура для анимации
@@ -18,17 +19,14 @@ struct Animation {
     Texture2D texture;
 };
 
-class AnimationSystem {
-private:
-    Animation goalAnimation;
-    Animation packAnimation;
+// Глобальные анимации
+extern Animation goalAnimation;
+extern Animation packAnimation;
 
-public:
-    AnimationSystem();
-    void UpdateAnimations(float deltaTime);
-    void DrawAnimations();
-    void StartGoalAnimation();
-    void StartPackAnimation(Texture2D playerTexture, const std::string& playerName);
-};
+// Функции анимации
+void StartGoalAnimation();
+void StartPackAnimation(Texture2D playerTexture, const std::string& playerName);
+void UpdateAnimations(float deltaTime);
+void DrawAnimations();
 
 #endif
