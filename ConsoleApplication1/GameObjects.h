@@ -55,9 +55,20 @@ struct Circle {
     bool canMoveFreely;    // Может ли мяч свободно перемещаться
 };
 
+// Структура для стрелки направления удара
+struct Arrow {
+    Vector2 position;
+    Vector2 direction;
+    float length;
+    float angle;
+    Color color;
+    bool visible;
+};
+
 // Функции для создания объектов
 Button CreateButton(float x, float y, float width, float height, const char* text, Color color, Color textColor);
 Goal CreateGoal(float width, float height, Vector2 position);
 Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const char* texturePath, int playerControlled = 0);
+Arrow CreateArrow(Vector2 position);
 
 #endif

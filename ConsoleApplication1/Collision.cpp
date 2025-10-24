@@ -1,5 +1,7 @@
 #include "Collision.h"
 
+// Существующие функции...
+
 bool CheckGoalCollision(const Circle& circle, const Goal& goal, Vector2& normal) {
     // Проверяем столкновение с левой штангой
     if (CheckCollisionCircleRec(circle.position, circle.radius, goal.leftPost)) {
@@ -298,6 +300,12 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
     keeper.bounds.y = keeper.position.y - keeper.height / 2;
 }
 
+// ... остальные функции (ApplySpin, UpdateSpin, GenerateCircles и т.д.) которые мы уже добавили ранее
+
+// ... существующие функции до конца файла
+
+// Добавляем недостающие функции:
+
 void ApplySpin(Circle& circle, const Vector2& direction, bool spinActive[4]) {
     // Сбрасываем все типы кручения
     for (int i = 0; i < 4; i++) {
@@ -532,5 +540,35 @@ void HandleWallCollision(Circle& circle) {
     else if (circle.position.y + circle.radius > MAX_HEIGHT) {
         circle.position.y = MAX_HEIGHT - circle.radius;
         circle.velocity.y = -circle.velocity.y * 0.9f;
+    }
+}
+
+void UpdateArrow(Arrow& arrow, const Circle& circle, const Vector2& mousePosition, bool isDragging) {
+    if (isDragging) {
+        arrow.visible = true;
+        arrow.position = circle.position;
+
+        // Вычисляем направление от мяча к курсору
+        Vector2 direction = Vector2Subtract(mousePosition, circle.position);
+
+        // Ограничиваем максимальную длину стрелки
+        float maxLength = 100.0f;
+        float distance = Vector2Length(direction);
+
+        if (distance > 0) {
+            direction = Vector2Normalize(direction);
+            arrow.length = (distance > maxLength) ? maxLength : distance;
+            arrow.angle = atan2f(direction.y, direction.x);
+
+            // Определяем цвет стрелки в зависимости от силы
+            float power = arrow.length / maxLength;
+            if (power < 0.3f) arrow.color = GREEN;
+            else if (power < 0.7f) arrow.color = YELLOW;
+            else arrow.color = RED;
+        }
+    }
+    else {
+        arrow.visible = false;
+        arrow.length = 0;
     }
 }

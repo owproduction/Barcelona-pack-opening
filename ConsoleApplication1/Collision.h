@@ -19,6 +19,7 @@ void MakeGoalkeeperJump(Goalkeeper& keeper);
 void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime);
 void ApplySpin(Circle& circle, const Vector2& direction, bool spinActive[4]);
 void UpdateSpin(Circle& circle, float deltaTime);
+void UpdateArrow(Arrow& arrow, const Circle& circle, const Vector2& mousePosition, bool isDragging);
 int GenerateCircles(std::vector<Circle>& circles, int count = 1, float radius = 15.0f,
     int minVelocity = 0, int maxVelocity = 0, GameMode mode = FREE_KICK);
 void StaticCollisionResolution(Circle& a, Circle& b);

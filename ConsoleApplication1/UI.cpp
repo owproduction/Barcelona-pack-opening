@@ -45,7 +45,7 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
         // Вычисляем расстояние между мячом и курсором
         float distance = Vector2Distance(circle.position, mousePosition);
 
-        // Ограничиваем максимальную дистанцию для лучшего визуального отображения
+        // Ограничиваем максимальную дистанцию для контроля силы
         float maxDistance = 150.0f;
         float power = (distance > maxDistance) ? 1.0f : distance / maxDistance;
 
@@ -86,6 +86,86 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
         // Отображаем тип удара
         DrawText(shotType.c_str(), barPosition.x, barPosition.y - 20, 15, fillColor);
     }
+}
+
+void DrawArrow(const Arrow& arrow) {
+    if (!arrow.visible || arrow.length <= 0) return;
+
+    // Рисуем линию стрелки
+    Vector2 endPoint = {
+        arrow.position.x + cosf(arrow.angle) * arrow.length,
+        arrow.position.y + sinf(arrow.angle) * arrow.length
+    };
+
+    // Основная линия стрелки
+    DrawLineEx(arrow.position, endPoint, 3, arrow.color);
+
+    // Наконечник стрелки (треугольник)
+    float arrowHeadLength = 15.0f;
+    float arrowHeadAngle = 30.0f * DEG2RAD;
+
+    Vector2 direction = Vector2Normalize(Vector2Subtract(endPoint, arrow.position));
+
+    // Левая часть наконечника
+    Vector2 leftHead = {
+        endPoint.x - arrowHeadLength * cosf(arrow.angle - arrowHeadAngle),
+        endPoint.y - arrowHeadLength * sinf(arrow.angle - arrowHeadAngle)
+    };
+
+    // Правая часть наконечника
+    Vector2 rightHead = {
+        endPoint.x - arrowHeadLength * cosf(arrow.angle + arrowHeadAngle),
+        endPoint.y - arrowHeadLength * sinf(arrow.angle + arrowHeadAngle)
+    };
+
+    // Рисуем наконечник
+    DrawTriangle(endPoint, leftHead, rightHead, arrow.color);
+
+    // Обводка для лучшей видимости
+    DrawLineEx(endPoint, leftHead, 2, Fade(BLACK, 0.5f));
+    DrawLineEx(endPoint, rightHead, 2, Fade(BLACK, 0.5f));
+}
+
+void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerName, bool showSkipButton) {
+    // Зеленый фон
+    DrawRectangle(0, 0, MAX_WIDTH, MAX_HEIGHT, GREEN);
+
+    // Рамка для карточки
+    Rectangle cardRect = { MAX_WIDTH / 2 - 150, MAX_HEIGHT / 2 - 200, 300, 400 };
+    DrawRectangleRec(cardRect, WHITE);
+    DrawRectangleLinesEx(cardRect, 5, GOLD);
+
+    // Картинка игрока
+    if (playerTexture.id != 0) {
+        Rectangle playerRect = { cardRect.x + 50, cardRect.y + 50, 200, 250 };
+        DrawTexturePro(playerTexture,
+            { 0, 0, (float)playerTexture.width, (float)playerTexture.height },
+            playerRect, { 0, 0 }, 0, WHITE);
+    }
+
+    // Имя игрока
+    DrawText(playerName.c_str(),
+        cardRect.x + cardRect.width / 2 - MeasureText(playerName.c_str(), 30) / 2,
+        cardRect.y + 320, 30, DARKGREEN);
+
+    // Текст "NEW PLAYER!"
+    const char* newText = "NEW PLAYER!";
+    DrawText(newText,
+        cardRect.x + cardRect.width / 2 - MeasureText(newText, 25) / 2,
+        cardRect.y + 360, 25, GOLD);
+
+    // Кнопка "SKIP" если нужно
+    if (showSkipButton) {
+        Rectangle skipButton = { MAX_WIDTH / 2 - 60, MAX_HEIGHT - 80, 120, 40 };
+        DrawRectangleRec(skipButton, RED);
+        DrawRectangleLinesEx(skipButton, 2, WHITE);
+        DrawText("SKIP", skipButton.x + skipButton.width / 2 - MeasureText("SKIP", 20) / 2,
+            skipButton.y + 10, 20, WHITE);
+    }
+
+    // Инструкция
+    DrawText("Press SPACE to continue", MAX_WIDTH / 2 - MeasureText("Press SPACE to continue", 20) / 2,
+        MAX_HEIGHT - 40, 20, WHITE);
 }
 
 void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton, Button collectionButton, Button exitButton) {

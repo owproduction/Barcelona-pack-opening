@@ -2,7 +2,7 @@
 
 // Анимации
 Animation goalAnimation = { false };
-Animation packAnimation = { false };
+PackAnimation packAnimation = { false };
 
 void StartGoalAnimation() {
     goalAnimation.active = true;
@@ -17,15 +17,10 @@ void StartGoalAnimation() {
 
 void StartPackAnimation(Texture2D playerTexture, const std::string& playerName) {
     packAnimation.active = true;
-    packAnimation.duration = 3.0f; // 3 секунды
-    packAnimation.timer = packAnimation.duration;
-    packAnimation.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT / 2.0f }; // Сразу по центру
-    packAnimation.velocity = { 0, 0 }; // Без движения
-    packAnimation.scale = 0.1f; // Начинаем маленьким
-    packAnimation.rotation = 0.0f;
-    packAnimation.color = WHITE;
-    packAnimation.texture = playerTexture;
-    packAnimation.text = playerName;
+    packAnimation.playerTexture = playerTexture;
+    packAnimation.playerName = playerName;
+    packAnimation.timer = 5.0f; // 5 секунд на просмотр карточки
+    packAnimation.showSkipButton = false;
 }
 
 void UpdateAnimations(float deltaTime) {
@@ -41,15 +36,21 @@ void UpdateAnimations(float deltaTime) {
         }
     }
 
-    // Обновление анимации пака - УПРОЩЕННАЯ ВЕРСИЯ
+    // Обновление анимации пака
     if (packAnimation.active) {
         packAnimation.timer -= deltaTime;
 
-        // ПЛАВНОЕ УВЕЛИЧЕНИЕ МАСШТАБА без движения и вращения
-        packAnimation.scale += deltaTime * 1.0f; // Быстрее увеличиваем масштаб
-        if (packAnimation.scale > 1.0f) packAnimation.scale = 1.0f;
+        // Показываем кнопку SKIP после 1 секунды
+        if (packAnimation.timer < 4.0f) {
+            packAnimation.showSkipButton = true;
+        }
 
         if (packAnimation.timer <= 0) {
+            packAnimation.active = false;
+        }
+
+        // Проверка нажатия SPACE для пропуска
+        if (IsKeyPressed(KEY_SPACE)) {
             packAnimation.active = false;
         }
     }
@@ -86,50 +87,6 @@ void DrawAnimations() {
                 goalAnimation.position.y + sinf(angle) * distance
             };
             DrawCircleV(particlePos, 3, Fade(YELLOW, alpha * 0.5f));
-        }
-    }
-
-    // Отрисовка анимации пака - УПРОЩЕННАЯ ВЕРСИЯ
-    if (packAnimation.active) {
-        float alpha = packAnimation.timer / packAnimation.duration;
-
-        if (packAnimation.texture.id != 0) {
-            Rectangle sourceRec = { 0, 0, (float)packAnimation.texture.width, (float)packAnimation.texture.height };
-            Rectangle destRec = {
-                packAnimation.position.x,
-                packAnimation.position.y,
-                packAnimation.texture.width * packAnimation.scale,
-                packAnimation.texture.height * packAnimation.scale
-            };
-            Vector2 origin = {
-                packAnimation.texture.width * packAnimation.scale / 2,
-                packAnimation.texture.height * packAnimation.scale / 2
-            };
-
-            DrawTexturePro(packAnimation.texture, sourceRec, destRec, origin, packAnimation.rotation, Fade(WHITE, alpha));
-        }
-
-        // Текст с именем игрока
-        const char* playerText = packAnimation.text.c_str();
-        int textWidth = MeasureText(playerText, 30);
-        DrawText(playerText,
-            packAnimation.position.x - textWidth / 2,
-            packAnimation.position.y + 80,
-            30, Fade(GREEN, alpha));
-
-        // Текст "NEW PLAYER!"
-        const char* newPlayerText = "NEW PLAYER!";
-        int newTextWidth = MeasureText(newPlayerText, 25);
-        DrawText(newPlayerText,
-            packAnimation.position.x - newTextWidth / 2,
-            packAnimation.position.y + 110,
-            25, Fade(GOLD, alpha));
-
-        // Эффект сияния (упрощенный)
-        for (int i = 0; i < 3; i++) {
-            float pulse = sinf(GetTime() * 8.0f + i) * 0.2f + 0.8f;
-            DrawCircleLines(packAnimation.position.x, packAnimation.position.y,
-                50 + i * 20 + pulse * 10, Fade(GOLD, alpha * 0.3f));
         }
     }
 }

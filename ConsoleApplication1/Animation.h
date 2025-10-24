@@ -19,9 +19,18 @@ struct Animation {
     Texture2D texture;
 };
 
+// Новая структура для анимации открытия пака
+struct PackAnimation {
+    bool active;
+    Texture2D playerTexture;
+    std::string playerName;
+    float timer;
+    bool showSkipButton;
+};
+
 // Глобальные анимации
 extern Animation goalAnimation;
-extern Animation packAnimation;
+extern PackAnimation packAnimation;
 
 // Функции анимации
 void StartGoalAnimation();

@@ -73,3 +73,14 @@ Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const c
 
     return keeper;
 }
+
+Arrow CreateArrow(Vector2 position) {
+    Arrow arrow;
+    arrow.position = position;
+    arrow.direction = { 0, 0 };
+    arrow.length = 0;
+    arrow.angle = 0;
+    arrow.color = WHITE;
+    arrow.visible = false;
+    return arrow;
+}

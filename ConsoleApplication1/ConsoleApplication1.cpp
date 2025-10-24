@@ -40,6 +40,7 @@ int main()
     bool dragging = false;
     Circle* selectedCircle = nullptr;
     Vector2 dragStartPosition;
+    Arrow arrow = CreateArrow({ 0, 0 }); // Добавляем стрелку
     int score = 0; // Счет голов для одного игрока
     int player1Score = 0, player2Score = 0; // Счет для двух игроков
     bool spinActive[4] = { false, false, false, false }; // Типы кручения: 0=влево, 1=вправо, 2=вверх, 3=вниз
@@ -250,6 +251,11 @@ int main()
                 }
             }
 
+            // Обновляем стрелку направления
+            if (dragging && selectedCircle != nullptr) {
+                UpdateArrow(arrow, *selectedCircle, mousePosition, dragging);
+            }
+
             std::vector<std::pair<Circle*, Circle*>> collisions;
 
             for (int i = 0; i < circles.size() - 1; ++i) {
@@ -264,23 +270,19 @@ int main()
 
             if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
                 if (selectedCircle != nullptr) {
-                    // Вычисляем направление и силу удара
-                    Vector2 direction = Vector2Subtract(selectedCircle->position, mousePosition);
-                    float distance = Vector2Length(direction);
+                    // Вычисляем направление и силу удара на основе стрелки
+                    Vector2 direction = {
+                        cosf(arrow.angle),
+                        sinf(arrow.angle)
+                    };
 
-                    // Ограничиваем максимальную дистанцию для контроля силы
-                    float maxDistance = 150.0f;
-                    if (distance > maxDistance) {
-                        distance = maxDistance;
-                        direction = Vector2Scale(Vector2Normalize(direction), maxDistance);
-                    }
+                    float power = arrow.length / 100.0f; // Нормализуем силу
 
-                    // УВЕЛИЧИВАЕМ СИЛУ УДАРА (было 0.15f, стало 0.25f)
+                    // УВЕЛИЧИВАЕМ СИЛУ УДАРА
                     float powerMultiplier = 0.25f;
 
                     // ПРИМЕНЯЕМ СИЛУ БЕЗ ИЗМЕНЕНИЙ В РЕЖИМЕ СЛОУМО
-                    // (сила удара остается прежней, замедляется только время)
-                    Vector2 acceleration = Vector2Scale(Vector2Normalize(direction), distance * powerMultiplier);
+                    Vector2 acceleration = Vector2Scale(direction, power * 150.0f * powerMultiplier);
 
                     selectedCircle->velocity = acceleration;
 
@@ -309,6 +311,7 @@ int main()
                 }
                 dragging = false;
                 selectedCircle = nullptr;
+                arrow.visible = false; // Скрываем стрелку после удара
                 // Не сбрасываем spinActive, чтобы можно было делать несколько ударов с одинаковой комбинацией
             }
 
@@ -391,6 +394,11 @@ int main()
                 }
             }
 
+            // Обновляем стрелку направления
+            if (dragging && selectedCircle != nullptr) {
+                UpdateArrow(arrow, *selectedCircle, mousePosition, dragging);
+            }
+
             std::vector<std::pair<Circle*, Circle*>> collisions;
 
             for (int i = 0; i < circles.size() - 1; ++i) {
@@ -405,19 +413,16 @@ int main()
 
             if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
                 if (selectedCircle != nullptr) {
-                    // Вычисляем направление и силу удара
-                    Vector2 direction = Vector2Subtract(selectedCircle->position, mousePosition);
-                    float distance = Vector2Length(direction);
+                    // Вычисляем направление и силу удара на основе стрелки
+                    Vector2 direction = {
+                        cosf(arrow.angle),
+                        sinf(arrow.angle)
+                    };
 
-                    // Ограничиваем максимальную дистанцию для контроля силы
-                    float maxDistance = 150.0f;
-                    if (distance > maxDistance) {
-                        distance = maxDistance;
-                        direction = Vector2Scale(Vector2Normalize(direction), maxDistance);
-                    }
+                    float power = arrow.length / 100.0f; // Нормализуем силу
 
                     float powerMultiplier = 0.25f;
-                    Vector2 acceleration = Vector2Scale(Vector2Normalize(direction), distance * powerMultiplier);
+                    Vector2 acceleration = Vector2Scale(direction, power * 150.0f * powerMultiplier);
 
                     selectedCircle->velocity = acceleration;
 
@@ -441,6 +446,7 @@ int main()
                 }
                 dragging = false;
                 selectedCircle = nullptr;
+                arrow.visible = false; // Скрываем стрелку после удара
             }
 
             // Обновляем вратаря (управляется игроком)
@@ -574,28 +580,12 @@ int main()
                 DrawCircleV(circle.position, circle.radius, WHITE);
             }
 
+            // Рисуем стрелку направления удара
+            DrawArrow(arrow);
+
             // Рисуем шкалу силы, если перетаскиваем мяч
             if (dragging && selectedCircle != nullptr) {
                 DrawPowerBar(*selectedCircle, mousePosition, dragging, spinActive);
-
-                // Рисуем линию от мяча к курсору
-                Color lineColor = WHITE;
-                int activeSpins = 0;
-                for (int i = 0; i < 4; i++) {
-                    if (spinActive[i]) activeSpins++;
-                }
-
-                if (activeSpins == 1) {
-                    if (spinActive[0]) lineColor = BLUE;
-                    else if (spinActive[1]) lineColor = RED;
-                    else if (spinActive[2]) lineColor = GREEN;
-                    else if (spinActive[3]) lineColor = YELLOW;
-                }
-                else if (activeSpins > 1) {
-                    lineColor = PURPLE;
-                }
-
-                DrawLineV(selectedCircle->position, mousePosition, lineColor);
             }
 
             // Отрисовываем анимации (поверх всего)
@@ -660,28 +650,12 @@ int main()
                 DrawCircleV(circle.position, circle.radius, WHITE);
             }
 
+            // Рисуем стрелку направления удара
+            DrawArrow(arrow);
+
             // Рисуем шкалу силы, если перетаскиваем мяч
             if (dragging && selectedCircle != nullptr) {
                 DrawPowerBar(*selectedCircle, mousePosition, dragging, spinActive);
-
-                // Рисуем линию от мяча к курсору
-                Color lineColor = WHITE;
-                int activeSpins = 0;
-                for (int i = 0; i < 4; i++) {
-                    if (spinActive[i]) activeSpins++;
-                }
-
-                if (activeSpins == 1) {
-                    if (spinActive[0]) lineColor = BLUE;
-                    else if (spinActive[1]) lineColor = RED;
-                    else if (spinActive[2]) lineColor = GREEN;
-                    else if (spinActive[3]) lineColor = YELLOW;
-                }
-                else if (activeSpins > 1) {
-                    lineColor = PURPLE;
-                }
-
-                DrawLineV(selectedCircle->position, mousePosition, lineColor);
             }
 
             // Отрисовываем анимации (поверх всего)
@@ -713,7 +687,21 @@ int main()
         case SHOP:
             DrawShop();
             // Отрисовываем анимацию пака поверх магазина
-            DrawAnimations();
+            if (packAnimation.active) {
+                DrawPackAnimationScreen(packAnimation.playerTexture, packAnimation.playerName, packAnimation.showSkipButton);
+
+                // Обработка клика по кнопке SKIP
+                if (packAnimation.showSkipButton && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    Rectangle skipButton = { MAX_WIDTH / 2 - 60, MAX_HEIGHT - 80, 120, 40 };
+                    if (CheckCollisionPointRec(mousePosition, skipButton)) {
+                        packAnimation.active = false;
+                        gameState = MENU; // Возвращаем в главное меню
+                    }
+                }
+            }
+            else {
+                DrawAnimations();
+            }
             break;
 
         case COLLECTION:
