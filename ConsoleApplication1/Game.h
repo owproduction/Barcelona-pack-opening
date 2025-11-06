@@ -26,26 +26,32 @@ enum GameMode {
     FREE_KICK,
     PENALTY
 };
+// Убираем enum PlayerRarity, оставляем только индивидуальные бонусы
 
-// ��������� ��� ����������
 struct Footballer {
     Texture2D texture;
     std::string name;
     bool unlocked;
+    float powerBonus;  // Индивидуальный бонус силы для каждого игрока
+    Texture2D ballTexture; // Текстура мяча для этого игрока
 };
 
-// ���������� ����������
-extern int coins;
+// Глобальные переменные
 extern std::vector<Footballer> footballers;
-extern Texture2D packTexture;
-extern GameMode currentGameMode;
+extern int coins;
 extern int collectionPage;
 extern int playersPerPage;
+extern Texture2D packTexture;
+extern GameMode currentGameMode;                
+extern Footballer* selectedPlayer;
+extern float playerPowerBonus;
+extern Texture2D currentBallTexture;
 
-// ������� ����
+// Функции
 void LoadFootballers();
 void OpenPack();
-void UpdateAnimations(float deltaTime);
-void DrawAnimations();
+void SelectPlayer(int index);
+
+
 
 #endif

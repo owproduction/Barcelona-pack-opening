@@ -254,19 +254,35 @@ void DrawCollection() {
         MAX_WIDTH / 2 - MeasureText(TextFormat("Unlocked: %d/%d", unlockedCount, footballers.size()), 25) / 2,
         100, 25, WHITE);
 
-    // ���������� ����� ��������
+    // Отображаем выбранного игрока с индивидуальным бонусом
+    if (selectedPlayer != nullptr) {
+        DrawText(TextFormat("SELECTED: %s (Power: +%.0f%%)",
+            selectedPlayer->name.c_str(),
+            (selectedPlayer->powerBonus - 1.0f) * 100),
+            MAX_WIDTH / 2 - MeasureText(TextFormat("SELECTED: %s (Power: +%.0f%%)",
+                selectedPlayer->name.c_str(),
+                (selectedPlayer->powerBonus - 1.0f) * 100), 20) / 2,
+            130, 20, GREEN);
+    }
+    else {
+        DrawText("Click on a player to select them!",
+            MAX_WIDTH / 2 - MeasureText("Click on a player to select them!", 20) / 2,
+            130, 20, YELLOW);
+    }
+
+    // Отображаем номер страницы
     int totalPages = (footballers.size() + playersPerPage - 1) / playersPerPage;
     DrawText(TextFormat("Page %d/%d", collectionPage + 1, totalPages),
         MAX_WIDTH / 2 - MeasureText(TextFormat("Page %d/%d", collectionPage + 1, totalPages), 20) / 2,
-        130, 20, WHITE);
+        160, 20, WHITE);
 
-    // ���������� ����������� � �������� ����������
+    // Отображаем футболистов
     float startX = 50;
-    float startY = 170;
-    float cardWidth = 160;  // ������� ������ ��������
-    float cardHeight = 200; // ������� ������ ��������
-    float spacingX = 180;   // ���������� ����� ���������� �� X
-    float spacingY = 220;   // ���������� ����� ���������� �� Y
+    float startY = 190;
+    float cardWidth = 160;
+    float cardHeight = 200;
+    float spacingX = 180;
+    float spacingY = 220;
 
     int startIndex = collectionPage * playersPerPage;
     int endIndex = startIndex + playersPerPage;
@@ -278,37 +294,55 @@ void DrawCollection() {
         float y = startY + (indexOnPage / 3) * spacingY;
 
         if (footballers[i].unlocked) {
-            // ���������� ����������������� ����������
+            // Подсвечиваем выбранного игрока
+            bool isSelected = (selectedPlayer == &footballers[i]);
+
             if (footballers[i].texture.id != 0) {
                 Rectangle playerRect = { x, y, cardWidth, cardHeight - 40 };
+
+                // Рамка вокруг выбранного игрока
+                if (isSelected) {
+                    DrawRectangleLinesEx({ x - 5, y - 5, cardWidth + 10, cardHeight - 30 }, 3, GOLD);
+                }
+
                 DrawTexturePro(footballers[i].texture, { 0, 0, (float)footballers[i].texture.width, (float)footballers[i].texture.height },
                     playerRect, { 0, 0 }, 0, WHITE);
 
-                // ����� ������ ��������
-                DrawRectangleLinesEx(playerRect, 2, GREEN);
+                DrawRectangleLinesEx(playerRect, 2, isSelected ? GOLD : GREEN);
             }
 
-            // ��� ���������� ��� ���������
+            // Имя футболиста под картинкой
             DrawText(footballers[i].name.c_str(),
                 x + cardWidth / 2 - MeasureText(footballers[i].name.c_str(), 20) / 2,
-                y + cardHeight - 35, 20, GREEN);
+                y + cardHeight - 35, 20, isSelected ? GOLD : GREEN);
+
+            // Отображаем индивидуальный бонус силы
+            DrawText(TextFormat("+%.0f%% POWER", (footballers[i].powerBonus - 1.0f) * 100),
+                x + cardWidth / 2 - MeasureText(TextFormat("+%.0f%% POWER", (footballers[i].powerBonus - 1.0f) * 100), 15) / 2,
+                y + cardHeight - 15, 15, YELLOW);
+
+            // Обработка клика для выбора игрока
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+                CheckCollisionPointRec(GetMousePosition(), { x, y, cardWidth, cardHeight })) {
+                SelectPlayer(i);
+            }
         }
         else {
-            // ���������� ���������������� ����������
+            // Отображаем заблокированного футболиста
             Rectangle cardRect = { x, y, cardWidth, cardHeight - 40 };
             DrawRectangleRec(cardRect, DARKGRAY);
             DrawRectangleLinesEx(cardRect, 2, GRAY);
 
             DrawText("???", x + cardWidth / 2 - MeasureText("???", 25) / 2, y + (cardHeight - 40) / 2 - 12, 25, WHITE);
 
-            // ����� "LOCKED" ��� ���������
+            // Текст "LOCKED" под картинкой
             DrawText("LOCKED",
                 x + cardWidth / 2 - MeasureText("LOCKED", 18) / 2,
                 y + cardHeight - 35, 18, GRAY);
         }
     }
 
-    // ������ �������������� �������
+    // Кнопки перелистывания страниц
     if (collectionPage > 0) {
         DrawText("<< PREV", 20, MAX_HEIGHT - 40, 20, WHITE);
     }
@@ -319,6 +353,21 @@ void DrawCollection() {
     DrawText("H - Back to Menu", 10, MAX_HEIGHT - 70, 20, WHITE);
 }
 
+// Добавь функцию отрисовки мяча с текстурой
+void DrawBall(const Circle& circle) {
+    if (currentBallTexture.id != 0) {
+        // Рисуем текстуру мяча вместо белого круга
+        Rectangle sourceRec = { 0, 0, (float)currentBallTexture.width, (float)currentBallTexture.height };
+        Rectangle destRec = { circle.position.x, circle.position.y, circle.radius * 2, circle.radius * 2 };
+        Vector2 origin = { circle.radius, circle.radius };
+
+        DrawTexturePro(currentBallTexture, sourceRec, destRec, origin, 0, WHITE);
+    }
+    else {
+        // Резервный вариант - белый круг
+        DrawCircleV(circle.position, circle.radius, WHITE);
+    }
+}
 void DrawTwoPlayersScore(int player1Score, int player2Score) {
     DrawText(TextFormat("PLAYER 1: %d", player1Score), 10, 10, 20, BLUE);
     DrawText(TextFormat("PLAYER 2: %d", player2Score), MAX_WIDTH - 150, 10, 20, RED);
@@ -329,4 +378,43 @@ void DrawGameModeInfo(GameMode mode) {
     Color modeColor = (mode == FREE_KICK) ? GREEN : YELLOW;
 
     DrawText(TextFormat("MODE: %s", modeText), MAX_WIDTH / 2 - MeasureText(TextFormat("MODE: %s", modeText), 20) / 2, 70, 20, modeColor);
+}
+
+void DrawSelectedPlayerInfo() {
+    if (selectedPlayer != nullptr) {
+        // Позиция внизу экрана по центру
+        int yPos = MAX_HEIGHT - 60;
+
+        // Фон для информации
+        DrawRectangle(MAX_WIDTH / 2 - 150, yPos - 10, 300, 50, Fade(BLACK, 0.5f));
+        DrawRectangleLines(MAX_WIDTH / 2 - 150, yPos - 10, 300, 50, WHITE);
+
+        // Текстура игрока (маленькая)
+        if (selectedPlayer->texture.id != 0) {
+            Rectangle playerRect = { MAX_WIDTH / 2 - 140, yPos, 40, 40 };
+            DrawTexturePro(selectedPlayer->texture,
+                { 0, 0, (float)selectedPlayer->texture.width, (float)selectedPlayer->texture.height },
+                playerRect, { 0, 0 }, 0, WHITE);
+        }
+
+        // Имя игрока и бонус
+        DrawText(selectedPlayer->name.c_str(), MAX_WIDTH / 2 - 90, yPos + 5, 20, WHITE);
+        DrawText(TextFormat("+%.0f%% POWER", (selectedPlayer->powerBonus - 1.0f) * 100),
+            MAX_WIDTH / 2 - 90, yPos + 25, 15, YELLOW);
+
+        // Текстура мяча игрока
+        if (currentBallTexture.id != 0) {
+            Rectangle ballRect = { MAX_WIDTH / 2 + 100, yPos + 5, 30, 30 };
+            DrawTexturePro(currentBallTexture,
+                { 0, 0, (float)currentBallTexture.width, (float)currentBallTexture.height },
+                ballRect, { 15, 15 }, 0, WHITE);
+        }
+    }
+    else {
+        // Если игрок не выбран
+        int yPos = MAX_HEIGHT - 40;
+        DrawText("No player selected - Go to Collection!",
+            MAX_WIDTH / 2 - MeasureText("No player selected - Go to Collection!", 20) / 2,
+            yPos, 20, RED);
+    }
 }

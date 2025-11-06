@@ -363,6 +363,15 @@ int main()
                 if (currentGameMode == PENALTY && !circle.canMoveFreely && Vector2Length(circle.velocity) < 10.0f) {
                     ResetCircle(circle, currentGameMode);
                 }
+                DrawText("A/LEFT - Left Spin", 10, MAX_HEIGHT - 140, 15, spinActive[0] ? BLUE : WHITE);
+                DrawText("D/RIGHT - Right Spin", 10, MAX_HEIGHT - 120, 15, spinActive[1] ? RED : WHITE);
+                DrawText("W/UP - Top Spin", 10, MAX_HEIGHT - 100, 15, spinActive[2] ? GREEN : WHITE);
+                DrawText("S/DOWN - Back Spin", 10, MAX_HEIGHT - 80, 15, spinActive[3] ? YELLOW : WHITE);
+                DrawText("SPACE - Slow Motion", 10, MAX_HEIGHT - 60, 15, slowMoActive ? ORANGE : WHITE);
+                DrawText("H - Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
+
+                // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
+                DrawSelectedPlayerInfo();
             }
         }
         break;
@@ -393,6 +402,25 @@ int main()
                     }
                 }
             }
+
+            // Отображаем управление
+            DrawText("PLAYER 1 (Shooter):", 10, MAX_HEIGHT - 160, 15, BLUE);
+            DrawText("WASD - Spin, Mouse - Aim/Shoot", 10, MAX_HEIGHT - 140, 15, BLUE);
+
+            if (goalkeeperController == 1) {
+                DrawText("PLAYER 1 (Goalkeeper):", 10, MAX_HEIGHT - 110, 15, BLUE);
+                DrawText("Arrows - Move, SPACE - Jump", 10, MAX_HEIGHT - 90, 15, BLUE);
+            }
+            else {
+                DrawText("PLAYER 2 (Goalkeeper):", MAX_WIDTH - 200, MAX_HEIGHT - 110, 15, RED);
+                DrawText("Arrows - Move, SPACE - Jump", MAX_WIDTH - 200, MAX_HEIGHT - 90, 15, RED);
+            }
+
+            DrawText("H - Back to Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
+
+            // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
+            DrawSelectedPlayerInfo();
+
 
             // Обновляем стрелку направления
             if (dragging && selectedCircle != nullptr) {
@@ -575,9 +603,9 @@ int main()
             // Рисуем вратаря (PNG текстура)
             DrawGoalkeeper(goalkeeper);
 
-            // Рисуем круги
+            // Рисуем мячи с текстурами
             for (const auto& circle : circles) {
-                DrawCircleV(circle.position, circle.radius, WHITE);
+                DrawBall(circle);
             }
 
             // Рисуем стрелку направления удара

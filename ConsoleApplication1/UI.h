@@ -20,5 +20,7 @@ void DrawCollection();
 void DrawTwoPlayersScore(int player1Score, int player2Score);
 void DrawGameModeInfo(GameMode mode);
 void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerName, bool showSkipButton);
+void DrawBall(const Circle& circle);
+void DrawSelectedPlayerInfo();
 
 #endif

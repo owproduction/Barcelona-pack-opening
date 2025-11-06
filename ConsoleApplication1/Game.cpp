@@ -4,128 +4,122 @@
 #include "Animation.h"
 #include <iostream>
 
-// ���������� ����������
-int coins = 0;
+// Глобальные переменные
 std::vector<Footballer> footballers;
+int coins = 0;
+int collectionPage = 0;
+int playersPerPage = 9;
 Texture2D packTexture = { 0 };
 GameMode currentGameMode = FREE_KICK;
-int collectionPage = 0;
-int playersPerPage = 6;
+Footballer* selectedPlayer = nullptr;
+float playerPowerBonus = 1.0f;
+Texture2D currentBallTexture = { 0 };
 
 void LoadFootballers() {
-    footballers.clear();
+    // Загружаем 15 футболистов с разными индивидуальными бонусами
+    Footballer player1 = {
+        LoadTexture("player1.png"), "Messi", false, 1.3f, // +30%
+        LoadTexture("ball_messi.png")
+    };
+    Footballer player2 = {
+        LoadTexture("player2.png"), "Ronaldo", false, 1.3f, // +30%
+        LoadTexture("ball_ronaldo.png")
+    };
+    Footballer player3 = {
+        LoadTexture("player3.png"), "Neymar", false, 1.25f, // +25%
+        LoadTexture("ball_neymar.png")
+    };
+    Footballer player4 = {
+        LoadTexture("player4.png"), "Mbappe", false, 1.25f, // +25%
+        LoadTexture("ball_mbappe.png")
+    };
+    Footballer player5 = {
+        LoadTexture("player5.png"), "Haaland", false, 1.2f, // +20%
+        LoadTexture("ball_haaland.png")
+    };
+    Footballer player6 = {
+        LoadTexture("player6.png"), "Lewandowski", false, 1.2f, // +20%
+        LoadTexture("ball_lewandowski.png")
+    };
+    Footballer player7 = {
+        LoadTexture("player7.png"), "De Bruyne", false, 1.15f, // +15%
+        LoadTexture("ball_debruyne.png")
+    };
+    Footballer player8 = {
+        LoadTexture("player8.png"), "Salah", false, 1.1f, // +10%
+        LoadTexture("ball_salah.png")
+    };
+    Footballer player9 = {
+        LoadTexture("player9.png"), "Kane", false, 1.1f, // +10%
+        LoadTexture("ball_kane.png")
+    };
+    Footballer player10 = {
+        LoadTexture("player10.png"), "Benzema", false, 1.1f, // +10%
+        LoadTexture("ball_benzema.png")
+    };
+    Footballer player11 = {
+        LoadTexture("player11.png"), "Modric", false, 1.05f, // +5%
+        LoadTexture("ball_modric.png")
+    };
+    Footballer player12 = {
+        LoadTexture("player12.png"), "Van Dijk", false, 1.05f, // +5%
+        LoadTexture("ball_vandijk.png")
+    };
+    Footballer player13 = {
+        LoadTexture("player13.png"), "Courtois", false, 1.0f, // +0%
+        LoadTexture("ball_courtois.png")
+    };
+    Footballer player14 = {
+        LoadTexture("player14.png"), "Son", false, 1.0f, // +0%
+        LoadTexture("ball_son.png")
+    };
+    Footballer player15 = {
+        LoadTexture("player15.png"), "Pedri", false, 1.0f, // +0%
+        LoadTexture("ball_pedri.png")
+    };
 
-    // ��������� 15 ����������� (������ ���� �� ���� PNG �����)
-    Footballer f1;
-    f1.texture = LoadTexture("player1.png");
-    f1.name = "Messi";
-    f1.unlocked = false;
-    footballers.push_back(f1);
+    footballers = { player1, player2, player3, player4, player5, player6, player7, player8,
+                   player9, player10, player11, player12, player13, player14, player15 };
 
-    Footballer f2;
-    f2.texture = LoadTexture("player2.png");
-    f2.name = "Ronaldo";
-    f2.unlocked = false;
-    footballers.push_back(f2);
+    // Устанавливаем текстуру мяча по умолчанию
+    currentBallTexture = LoadTexture("ball.png");
+}
 
-    Footballer f3;
-    f3.texture = LoadTexture("player3.png");
-    f3.name = "Neymar";
-    f3.unlocked = false;
-    footballers.push_back(f3);
+void SelectPlayer(int index) {
+    if (index >= 0 && index < footballers.size() && footballers[index].unlocked) {
+        selectedPlayer = &footballers[index];
 
-    Footballer f4;
-    f4.texture = LoadTexture("player4.png");
-    f4.name = "Mbappe";
-    f4.unlocked = false;
-    footballers.push_back(f4);
+        // Устанавливаем индивидуальный бонус силы игрока
+        playerPowerBonus = footballers[index].powerBonus;
 
-    Footballer f5;
-    f5.texture = LoadTexture("player5.png");
-    f5.name = "Haaland";
-    f5.unlocked = false;
-    footballers.push_back(f5);
-
-    // ��������� ��� 10 �����������
-    Footballer f6;
-    f6.texture = LoadTexture("player6.png");
-    f6.name = "Lewandowski";
-    f6.unlocked = false;
-    footballers.push_back(f6);
-
-    Footballer f7;
-    f7.texture = LoadTexture("player7.png");
-    f7.name = "Benzema";
-    f7.unlocked = false;
-    footballers.push_back(f7);
-
-    Footballer f8;
-    f8.texture = LoadTexture("player8.png");
-    f8.name = "Salah";
-    f8.unlocked = false;
-    footballers.push_back(f8);
-
-    Footballer f9;
-    f9.texture = LoadTexture("player9.png");
-    f9.name = "Kane";
-    f9.unlocked = false;
-    footballers.push_back(f9);
-
-    Footballer f10;
-    f10.texture = LoadTexture("player10.png");
-    f10.name = "De Bruyne";
-    f10.unlocked = false;
-    footballers.push_back(f10);
-
-    Footballer f11;
-    f11.texture = LoadTexture("player11.png");
-    f11.name = "Modric";
-    f11.unlocked = false;
-    footballers.push_back(f11);
-
-    Footballer f12;
-    f12.texture = LoadTexture("player12.png");
-    f12.name = "Van Dijk";
-    f12.unlocked = false;
-    footballers.push_back(f12);
-
-    Footballer f13;
-    f13.texture = LoadTexture("player13.png");
-    f13.name = "Courtois";
-    f13.unlocked = false;
-    footballers.push_back(f13);
-
-    Footballer f14;
-    f14.texture = LoadTexture("player14.png");
-    f14.name = "Son";
-    f14.unlocked = false;
-    footballers.push_back(f14);
-
-    Footballer f15;
-    f15.texture = LoadTexture("player15.png");
-    f15.name = "Zlatan";
-    f15.unlocked = false;
-    footballers.push_back(f15);
+        // Меняем текстуру мяча на текстуру игрока
+        if (footballers[index].ballTexture.id != 0) {
+            currentBallTexture = footballers[index].ballTexture;
+        }
+    }
 }
 
 void OpenPack() {
     if (coins >= 10) {
         coins -= 10;
 
-        // ��������� �������� ����� ����� �����
-        SaveProgress();
+        std::vector<int> lockedIndices;
+        for (int i = 0; i < footballers.size(); i++) {
+            if (!footballers[i].unlocked) {
+                lockedIndices.push_back(i);
+            }
+        }
 
-        // ��������� ����� ����������
-        int randomIndex = GetRandomValue(0, footballers.size() - 1);
+        if (!lockedIndices.empty()) {
+            int randomIndex = lockedIndices[GetRandomValue(0, lockedIndices.size() - 1)];
+            footballers[randomIndex].unlocked = true;
 
-        // ���������, ��� �� ��� ������������� ���� ���������
-        bool wasUnlocked = footballers[randomIndex].unlocked;
-        footballers[randomIndex].unlocked = true;
+            // Автоматически выбираем нового игрока
+            SelectPlayer(randomIndex);
 
-        // ��������� �������� �������� ����
-        StartPackAnimation(footballers[randomIndex].texture, footballers[randomIndex].name);
+            StartPackAnimation(footballers[randomIndex].texture, footballers[randomIndex].name);
+        }
 
-        // ��������� �������� ����� ������������� ����������
         SaveProgress();
     }
 }
