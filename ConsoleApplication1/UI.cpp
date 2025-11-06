@@ -1,4 +1,4 @@
-#include "UI.h"
+п»ї#include "UI.h"
 
 bool IsButtonClicked(Button button) {
     return CheckCollisionPointRec(GetMousePosition(), button.bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -8,7 +8,7 @@ void DrawButton(Button button) {
     DrawRectangleRec(button.bounds, button.color);
     DrawRectangleLinesEx(button.bounds, 2, WHITE);
 
-    // Центрирование текста
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     int textWidth = MeasureText(button.text, 20);
     int textHeight = 20;
     DrawText(button.text,
@@ -18,46 +18,46 @@ void DrawButton(Button button) {
 }
 
 void DrawGoal(const Goal& goal) {
-    // Рисуем левую штангу
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     DrawRectangleRec(goal.leftPost, WHITE);
-    // Рисуем правую штангу
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     DrawRectangleRec(goal.rightPost, WHITE);
-    // Рисуем перекладину
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawRectangleRec(goal.crossbar, WHITE);
 }
 
 void DrawGoalkeeper(const Goalkeeper& keeper) {
     if (keeper.texture.id != 0) {
-        // Рисуем текстуру вратаря
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Rectangle sourceRec = { 0, 0, (float)keeper.texture.width, (float)keeper.texture.height };
         Rectangle destRec = { keeper.position.x, keeper.position.y, keeper.width, keeper.height };
         Vector2 origin = { keeper.width / 2, keeper.height / 2 };
         DrawTexturePro(keeper.texture, sourceRec, destRec, origin, 0, WHITE);
     }
     else {
-        // Резервный вариант - оранжевый прямоугольник
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         DrawRectangleRec(keeper.bounds, ORANGE);
     }
 }
 
 void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDragging, bool spinActive[4]) {
     if (isDragging) {
-        // Вычисляем расстояние между мячом и курсором
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float distance = Vector2Distance(circle.position, mousePosition);
 
-        // Ограничиваем максимальную дистанцию для контроля силы
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         float maxDistance = 150.0f;
         float power = (distance > maxDistance) ? 1.0f : distance / maxDistance;
 
-        // Позиция шкалы (над мячом)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
         Vector2 barPosition = { circle.position.x - 50, circle.position.y - 40 };
         float barWidth = 100.0f;
         float barHeight = 10.0f;
 
-        // Рисуем фон шкалы
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth, barHeight }, GRAY);
 
-        // Определяем цвет и тип удара на основе активных кручений
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Color fillColor = WHITE;
         std::string shotType = "NORMAL SHOT";
 
@@ -77,13 +77,13 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
             shotType = "COMBO SPIN";
         }
 
-        // Рисуем заполнение шкалы (цвет зависит от типа удара)
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth * power, barHeight }, fillColor);
 
-        // Рисуем контур шкалы
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         DrawRectangleLines(barPosition.x, barPosition.y, barWidth, barHeight, WHITE);
 
-        // Отображаем тип удара
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         DrawText(shotType.c_str(), barPosition.x, barPosition.y - 20, 15, fillColor);
     }
 }
@@ -91,51 +91,51 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
 void DrawArrow(const Arrow& arrow) {
     if (!arrow.visible || arrow.length <= 0) return;
 
-    // Рисуем линию стрелки
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Vector2 endPoint = {
         arrow.position.x + cosf(arrow.angle) * arrow.length,
         arrow.position.y + sinf(arrow.angle) * arrow.length
     };
 
-    // Основная линия стрелки
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawLineEx(arrow.position, endPoint, 3, arrow.color);
 
-    // Наконечник стрелки (треугольник)
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     float arrowHeadLength = 15.0f;
     float arrowHeadAngle = 30.0f * DEG2RAD;
 
     Vector2 direction = Vector2Normalize(Vector2Subtract(endPoint, arrow.position));
 
-    // Левая часть наконечника
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Vector2 leftHead = {
         endPoint.x - arrowHeadLength * cosf(arrow.angle - arrowHeadAngle),
         endPoint.y - arrowHeadLength * sinf(arrow.angle - arrowHeadAngle)
     };
 
-    // Правая часть наконечника
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Vector2 rightHead = {
         endPoint.x - arrowHeadLength * cosf(arrow.angle + arrowHeadAngle),
         endPoint.y - arrowHeadLength * sinf(arrow.angle + arrowHeadAngle)
     };
 
-    // Рисуем наконечник
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawTriangle(endPoint, leftHead, rightHead, arrow.color);
 
-    // Обводка для лучшей видимости
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawLineEx(endPoint, leftHead, 2, Fade(BLACK, 0.5f));
     DrawLineEx(endPoint, rightHead, 2, Fade(BLACK, 0.5f));
 }
 
 void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerName, bool showSkipButton) {
-    // Зеленый фон
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
     DrawRectangle(0, 0, MAX_WIDTH, MAX_HEIGHT, GREEN);
 
-    // Рамка для карточки
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Rectangle cardRect = { MAX_WIDTH / 2 - 150, MAX_HEIGHT / 2 - 200, 300, 400 };
     DrawRectangleRec(cardRect, WHITE);
     DrawRectangleLinesEx(cardRect, 5, GOLD);
 
-    // Картинка игрока
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     if (playerTexture.id != 0) {
         Rectangle playerRect = { cardRect.x + 50, cardRect.y + 50, 200, 250 };
         DrawTexturePro(playerTexture,
@@ -143,18 +143,18 @@ void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerN
             playerRect, { 0, 0 }, 0, WHITE);
     }
 
-    // Имя игрока
+    // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     DrawText(playerName.c_str(),
         cardRect.x + cardRect.width / 2 - MeasureText(playerName.c_str(), 30) / 2,
         cardRect.y + 320, 30, DARKGREEN);
 
-    // Текст "NEW PLAYER!"
+    // пїЅпїЅпїЅпїЅпїЅ "NEW PLAYER!"
     const char* newText = "NEW PLAYER!";
     DrawText(newText,
         cardRect.x + cardRect.width / 2 - MeasureText(newText, 25) / 2,
         cardRect.y + 360, 25, GOLD);
 
-    // Кнопка "SKIP" если нужно
+    // пїЅпїЅпїЅпїЅпїЅпїЅ "SKIP" пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (showSkipButton) {
         Rectangle skipButton = { MAX_WIDTH / 2 - 60, MAX_HEIGHT - 80, 120, 40 };
         DrawRectangleRec(skipButton, RED);
@@ -163,19 +163,19 @@ void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerN
             skipButton.y + 10, 20, WHITE);
     }
 
-    // Инструкция
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawText("Press SPACE to continue", MAX_WIDTH / 2 - MeasureText("Press SPACE to continue", 20) / 2,
         MAX_HEIGHT - 40, 20, WHITE);
 }
 
 void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton, Button collectionButton, Button exitButton) {
-    // Заголовок
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawText("FOOTBALL GAME", MAX_WIDTH / 2 - MeasureText("FOOTBALL GAME", 40) / 2, 100, 40, WHITE);
 
-    // Отображаем количество монеток
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 160, 30, GOLD);
 
-    // Кнопки
+    // пїЅпїЅпїЅпїЅпїЅпїЅ
     DrawButton(playButton);
     DrawButton(twoPlayersButton);
     DrawButton(shopButton);
@@ -212,16 +212,16 @@ void DrawShop() {
     DrawText("SHOP", MAX_WIDTH / 2 - MeasureText("SHOP", 40) / 2, 50, 40, WHITE);
     DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 100, 30, GOLD);
 
-    // Отображаем пак
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
     if (packTexture.id != 0) {
         Rectangle packRect = { MAX_WIDTH / 2 - 100, 150, 200, 200 };
         DrawTexturePro(packTexture, { 0, 0, (float)packTexture.width, (float)packTexture.height },
             packRect, { 0, 0 }, 0, WHITE);
 
-        // Цена пака
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         DrawText("10 coins", MAX_WIDTH / 2 - MeasureText("10 coins", 25) / 2, 370, 25, GOLD);
 
-        // Кнопка покупки
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (coins >= 10) {
             DrawText("CLICK TO BUY", MAX_WIDTH / 2 - MeasureText("CLICK TO BUY", 20) / 2, 400, 20, GREEN);
         }
@@ -229,7 +229,7 @@ void DrawShop() {
             DrawText("NOT ENOUGH COINS", MAX_WIDTH / 2 - MeasureText("NOT ENOUGH COINS", 20) / 2, 400, 20, RED);
         }
 
-        // Информация о коллекции
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         int unlockedCount = 0;
         for (const auto& footballer : footballers) {
             if (footballer.unlocked) unlockedCount++;
@@ -254,19 +254,19 @@ void DrawCollection() {
         MAX_WIDTH / 2 - MeasureText(TextFormat("Unlocked: %d/%d", unlockedCount, footballers.size()), 25) / 2,
         100, 25, WHITE);
 
-    // Отображаем номер страницы
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     int totalPages = (footballers.size() + playersPerPage - 1) / playersPerPage;
     DrawText(TextFormat("Page %d/%d", collectionPage + 1, totalPages),
         MAX_WIDTH / 2 - MeasureText(TextFormat("Page %d/%d", collectionPage + 1, totalPages), 20) / 2,
         130, 20, WHITE);
 
-    // Отображаем футболистов с БОЛЬШИМИ КАРТОЧКАМИ
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     float startX = 50;
     float startY = 170;
-    float cardWidth = 160;  // БОЛЬШАЯ ШИРИНА КАРТОЧКИ
-    float cardHeight = 200; // БОЛЬШАЯ ВЫСОТА КАРТОЧКИ
-    float spacingX = 180;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО X
-    float spacingY = 220;   // РАССТОЯНИЕ МЕЖДУ КАРТОЧКАМИ ПО Y
+    float cardWidth = 160;  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    float cardHeight = 200; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    float spacingX = 180;   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ X
+    float spacingY = 220;   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Y
 
     int startIndex = collectionPage * playersPerPage;
     int endIndex = startIndex + playersPerPage;
@@ -278,37 +278,37 @@ void DrawCollection() {
         float y = startY + (indexOnPage / 3) * spacingY;
 
         if (footballers[i].unlocked) {
-            // Отображаем разблокированного футболиста
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (footballers[i].texture.id != 0) {
                 Rectangle playerRect = { x, y, cardWidth, cardHeight - 40 };
                 DrawTexturePro(footballers[i].texture, { 0, 0, (float)footballers[i].texture.width, (float)footballers[i].texture.height },
                     playerRect, { 0, 0 }, 0, WHITE);
 
-                // Рамка вокруг карточки
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 DrawRectangleLinesEx(playerRect, 2, GREEN);
             }
 
-            // Имя футболиста под картинкой
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             DrawText(footballers[i].name.c_str(),
                 x + cardWidth / 2 - MeasureText(footballers[i].name.c_str(), 20) / 2,
                 y + cardHeight - 35, 20, GREEN);
         }
         else {
-            // Отображаем заблокированного футболиста
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             Rectangle cardRect = { x, y, cardWidth, cardHeight - 40 };
             DrawRectangleRec(cardRect, DARKGRAY);
             DrawRectangleLinesEx(cardRect, 2, GRAY);
 
             DrawText("???", x + cardWidth / 2 - MeasureText("???", 25) / 2, y + (cardHeight - 40) / 2 - 12, 25, WHITE);
 
-            // Текст "LOCKED" под картинкой
+            // пїЅпїЅпїЅпїЅпїЅ "LOCKED" пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             DrawText("LOCKED",
                 x + cardWidth / 2 - MeasureText("LOCKED", 18) / 2,
                 y + cardHeight - 35, 18, GRAY);
         }
     }
 
-    // Кнопки перелистывания страниц
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     if (collectionPage > 0) {
         DrawText("<< PREV", 20, MAX_HEIGHT - 40, 20, WHITE);
     }

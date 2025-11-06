@@ -1,12 +1,12 @@
-#include "Animation.h"
+п»ї#include "Animation.h"
 
-// Анимации
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 Animation goalAnimation = { false };
 PackAnimation packAnimation = { false };
 
 void StartGoalAnimation() {
     goalAnimation.active = true;
-    goalAnimation.duration = 2.0f; // 2 секунды
+    goalAnimation.duration = 2.0f; // 2 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     goalAnimation.timer = goalAnimation.duration;
     goalAnimation.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT / 2.0f };
     goalAnimation.scale = 1.0f;
@@ -19,16 +19,16 @@ void StartPackAnimation(Texture2D playerTexture, const std::string& playerName) 
     packAnimation.active = true;
     packAnimation.playerTexture = playerTexture;
     packAnimation.playerName = playerName;
-    packAnimation.timer = 5.0f; // 5 секунд на просмотр карточки
+    packAnimation.timer = 5.0f; // 5 пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     packAnimation.showSkipButton = false;
 }
 
 void UpdateAnimations(float deltaTime) {
-    // Обновление анимации гола
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     if (goalAnimation.active) {
         goalAnimation.timer -= deltaTime;
 
-        // Пульсация текста
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         goalAnimation.scale = 1.0f + sinf(GetTime() * 10.0f) * 0.2f;
 
         if (goalAnimation.timer <= 0) {
@@ -36,11 +36,11 @@ void UpdateAnimations(float deltaTime) {
         }
     }
 
-    // Обновление анимации пака
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     if (packAnimation.active) {
         packAnimation.timer -= deltaTime;
 
-        // Показываем кнопку SKIP после 1 секунды
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ SKIP пїЅпїЅпїЅпїЅпїЅ 1 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (packAnimation.timer < 4.0f) {
             packAnimation.showSkipButton = true;
         }
@@ -49,7 +49,7 @@ void UpdateAnimations(float deltaTime) {
             packAnimation.active = false;
         }
 
-        // Проверка нажатия SPACE для пропуска
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ SPACE пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (IsKeyPressed(KEY_SPACE)) {
             packAnimation.active = false;
         }
@@ -57,7 +57,7 @@ void UpdateAnimations(float deltaTime) {
 }
 
 void DrawAnimations() {
-    // Отрисовка анимации гола
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     if (goalAnimation.active) {
         float alpha = goalAnimation.timer / goalAnimation.duration;
         Color textColor = Fade(goalAnimation.color, alpha);
@@ -66,19 +66,19 @@ void DrawAnimations() {
         const char* text = goalAnimation.text.c_str();
         int textWidth = MeasureText(text, fontSize);
 
-        // Тень
+        // пїЅпїЅпїЅпїЅ
         DrawText(text,
             goalAnimation.position.x - textWidth / 2 + 3,
             goalAnimation.position.y - fontSize / 2 + 3,
             fontSize, Fade(BLACK, alpha * 0.5f));
 
-        // Основной текст
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         DrawText(text,
             goalAnimation.position.x - textWidth / 2,
             goalAnimation.position.y - fontSize / 2,
             fontSize, textColor);
 
-        // Эффект частиц
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         for (int i = 0; i < 20; i++) {
             float angle = GetTime() * 5.0f + i * 18.0f * DEG2RAD;
             float distance = 100.0f * (1.0f - alpha);

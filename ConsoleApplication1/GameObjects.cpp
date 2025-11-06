@@ -1,4 +1,4 @@
-#include "GameObjects.h"
+п»ї#include "GameObjects.h"
 
 Button CreateButton(float x, float y, float width, float height, const char* text, Color color, Color textColor) {
     Button button;
@@ -15,11 +15,11 @@ Goal CreateGoal(float width, float height, Vector2 position) {
     goal.height = height;
     goal.position = position;
 
-    // Размеры штанг и перекладины
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     float postWidth = 10.0f;
     float crossbarHeight = 10.0f;
 
-    // Левая штанга
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     goal.leftPost = {
         position.x - width / 2 - postWidth / 2,
         position.y - height / 2,
@@ -27,7 +27,7 @@ Goal CreateGoal(float width, float height, Vector2 position) {
         height
     };
 
-    // Правая штанга
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     goal.rightPost = {
         position.x + width / 2 - postWidth / 2,
         position.y - height / 2,
@@ -35,7 +35,7 @@ Goal CreateGoal(float width, float height, Vector2 position) {
         height
     };
 
-    // Перекладина
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     goal.crossbar = {
         position.x - width / 2,
         position.y - height / 2 - crossbarHeight / 2,
@@ -58,16 +58,16 @@ Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const c
     keeper.jumpTimer = 0;
     keeper.jumpDirection = { 0, 0 };
     keeper.playerControlled = playerControlled;
-    keeper.moveSpeed = 300.0f; // Скорость движения для игрока
+    keeper.moveSpeed = 300.0f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
-    // Загружаем текстуру вратаря
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Image image = LoadImage(texturePath);
     if (image.data != NULL) {
         keeper.texture = LoadTextureFromImage(image);
         UnloadImage(image);
     }
     else {
-        // Если текстура не загрузилась, создаем пустую текстуру
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         keeper.texture = { 0 };
     }
 

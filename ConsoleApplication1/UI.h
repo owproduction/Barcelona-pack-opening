@@ -1,11 +1,11 @@
-#ifndef UI_H
+п»ї#ifndef UI_H
 #define UI_H
 
 #include "raylib.h"
 #include "GameObjects.h"
 #include "Game.h"
 
-// Функции UI
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ UI
 bool IsButtonClicked(Button button);
 void DrawButton(Button button);
 void DrawGoal(const Goal& goal);

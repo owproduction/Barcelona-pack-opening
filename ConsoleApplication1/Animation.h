@@ -1,11 +1,11 @@
-#ifndef ANIMATION_H
+п»ї#ifndef ANIMATION_H
 #define ANIMATION_H
 
 #include "raylib.h"
-#include "Game.h"  // Добавляем для MAX_WIDTH, MAX_HEIGHT
+#include "Game.h"  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ MAX_WIDTH, MAX_HEIGHT
 #include <string>
 
-// Структура для анимации
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 struct Animation {
     bool active;
     float duration;
@@ -19,7 +19,7 @@ struct Animation {
     Texture2D texture;
 };
 
-// Новая структура для анимации открытия пака
+// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 struct PackAnimation {
     bool active;
     Texture2D playerTexture;
@@ -28,11 +28,11 @@ struct PackAnimation {
     bool showSkipButton;
 };
 
-// Глобальные анимации
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 extern Animation goalAnimation;
 extern PackAnimation packAnimation;
 
-// Функции анимации
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 void StartGoalAnimation();
 void StartPackAnimation(Texture2D playerTexture, const std::string& playerName);
 void UpdateAnimations(float deltaTime);

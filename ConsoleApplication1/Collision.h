@@ -1,12 +1,12 @@
-#ifndef COLLISION_H
+п»ї#ifndef COLLISION_H
 #define COLLISION_H
 
 #include "raylib.h"
 #include "GameObjects.h"
-#include "Game.h"  // Добавляем для GameMode, MAX_WIDTH, MAX_HEIGHT
+#include "Game.h"  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ GameMode, MAX_WIDTH, MAX_HEIGHT
 #include <vector>
 
-// Функции столкновений
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 bool CheckGoalCollision(const Circle& circle, const Goal& goal, Vector2& normal);
 bool CheckGoalkeeperCollision(const Circle& circle, const Goalkeeper& keeper);
 void HandleGoalkeeperCollision(Circle& circle, Goalkeeper& keeper);

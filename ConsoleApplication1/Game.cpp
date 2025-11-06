@@ -1,10 +1,10 @@
-#include "Game.h"
+п»ї#include "Game.h"
 #include "GameObjects.h"
 #include "SaveSystem.h"
 #include "Animation.h"
 #include <iostream>
 
-// Глобальные переменные
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 int coins = 0;
 std::vector<Footballer> footballers;
 Texture2D packTexture = { 0 };
@@ -15,7 +15,7 @@ int playersPerPage = 6;
 void LoadFootballers() {
     footballers.clear();
 
-    // Добавляем 15 футболистов (замени пути на свои PNG файлы)
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 15 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ PNG пїЅпїЅпїЅпїЅпїЅ)
     Footballer f1;
     f1.texture = LoadTexture("player1.png");
     f1.name = "Messi";
@@ -46,7 +46,7 @@ void LoadFootballers() {
     f5.unlocked = false;
     footballers.push_back(f5);
 
-    // Добавляем еще 10 футболистов
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ 10 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Footballer f6;
     f6.texture = LoadTexture("player6.png");
     f6.name = "Lewandowski";
@@ -112,20 +112,20 @@ void OpenPack() {
     if (coins >= 10) {
         coins -= 10;
 
-        // Сохраняем прогресс после траты монет
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         SaveProgress();
 
-        // Случайный выбор футболиста
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         int randomIndex = GetRandomValue(0, footballers.size() - 1);
 
-        // Проверяем, был ли уже разблокирован этот футболист
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         bool wasUnlocked = footballers[randomIndex].unlocked;
         footballers[randomIndex].unlocked = true;
 
-        // Запускаем анимацию открытия пака
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         StartPackAnimation(footballers[randomIndex].texture, footballers[randomIndex].name);
 
-        // Сохраняем прогресс после разблокировки футболиста
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         SaveProgress();
     }
 }

@@ -1,4 +1,4 @@
-#ifndef GAME_H
+п»ї#ifndef GAME_H
 #define GAME_H
 
 #include "raylib.h"
@@ -10,7 +10,7 @@ const int MAX_WIDTH = 600;
 const int MAX_HEIGHT = 800;
 const float damping = -0.05f;
 
-// Состояния игры
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 enum GameState {
     MENU,
     PLAYING,
@@ -21,20 +21,20 @@ enum GameState {
     GAME_MODE_SELECTION
 };
 
-// Режимы игры
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 enum GameMode {
     FREE_KICK,
     PENALTY
 };
 
-// Структура для футболиста
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 struct Footballer {
     Texture2D texture;
     std::string name;
     bool unlocked;
 };
 
-// Глобальные переменные
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 extern int coins;
 extern std::vector<Footballer> footballers;
 extern Texture2D packTexture;
@@ -42,7 +42,7 @@ extern GameMode currentGameMode;
 extern int collectionPage;
 extern int playersPerPage;
 
-// Функции игры
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 void LoadFootballers();
 void OpenPack();
 void UpdateAnimations(float deltaTime);

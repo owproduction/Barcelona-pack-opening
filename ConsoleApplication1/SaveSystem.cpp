@@ -1,14 +1,14 @@
-#include "SaveSystem.h"
+п»ї#include "SaveSystem.h"
 #include "Game.h"
 #include <fstream>
 
 void SaveProgress() {
     std::ofstream file("save.dat", std::ios::binary);
     if (file.is_open()) {
-        // Сохраняем количество монет
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         file.write(reinterpret_cast<const char*>(&coins), sizeof(coins));
 
-        // Сохраняем состояние разблокировки футболистов
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         for (const auto& footballer : footballers) {
             file.write(reinterpret_cast<const char*>(&footballer.unlocked), sizeof(bool));
         }
@@ -20,10 +20,10 @@ void SaveProgress() {
 void LoadProgress() {
     std::ifstream file("save.dat", std::ios::binary);
     if (file.is_open()) {
-        // Загружаем количество монет
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         file.read(reinterpret_cast<char*>(&coins), sizeof(coins));
 
-        // Загружаем состояние разблокировки футболистов
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         for (auto& footballer : footballers) {
             file.read(reinterpret_cast<char*>(&footballer.unlocked), sizeof(bool));
         }

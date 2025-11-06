@@ -1,23 +1,23 @@
-#include "Collision.h"
+п»ї#include "Collision.h"
 
-// Существующие функции...
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ...
 
 bool CheckGoalCollision(const Circle& circle, const Goal& goal, Vector2& normal) {
-    // Проверяем столкновение с левой штангой
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     if (CheckCollisionCircleRec(circle.position, circle.radius, goal.leftPost)) {
-        normal = { 1.0f, 0.0f }; // Нормаль направлена вправо (от левой штанги)
+        normal = { 1.0f, 0.0f }; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
         return true;
     }
 
-    // Проверяем столкновение с правой штангой
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     if (CheckCollisionCircleRec(circle.position, circle.radius, goal.rightPost)) {
-        normal = { -1.0f, 0.0f }; // Нормаль направлена влево (от правой штанги)
+        normal = { -1.0f, 0.0f }; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
         return true;
     }
 
-    // Проверяем столкновение с перекладиной
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     if (CheckCollisionCircleRec(circle.position, circle.radius, goal.crossbar)) {
-        normal = { 0.0f, 1.0f }; // Нормаль направлена вниз (от перекладины)
+        normal = { 0.0f, 1.0f }; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         return true;
     }
 
@@ -30,21 +30,21 @@ bool CheckGoalkeeperCollision(const Circle& circle, const Goalkeeper& keeper) {
 
 void HandleGoalkeeperCollision(Circle& circle, Goalkeeper& keeper) {
     if (CheckGoalkeeperCollision(circle, keeper)) {
-        // Вычисляем нормаль столкновения
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Vector2 normal = Vector2Normalize(Vector2Subtract(circle.position, keeper.position));
 
-        // Отражение мяча от вратаря
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float dotProduct = Vector2DotProduct(circle.velocity, normal);
 
         if (dotProduct < 0) {
-            // Отражение скорости относительно нормали
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.velocity = Vector2Subtract(circle.velocity,
                 Vector2Scale(normal, 2.0f * dotProduct));
 
-            // Добавляем затухание
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.velocity = Vector2Scale(circle.velocity, 0.8f);
 
-            // Немного отодвигаем мяч от вратаря
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.position = Vector2Add(circle.position, Vector2Scale(normal, 5.0f));
         }
     }
@@ -53,35 +53,35 @@ void HandleGoalkeeperCollision(Circle& circle, Goalkeeper& keeper) {
 void HandleGoalCollision(Circle& circle, const Goal& goal) {
     Vector2 normal;
     if (CheckGoalCollision(circle, goal, normal)) {
-        // Отскок от ворот
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         float dotProduct = Vector2DotProduct(circle.velocity, normal);
 
-        // Если круг движется в направлении препятствия
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (dotProduct < 0) {
-            // Отражение скорости относительно нормали
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.velocity = Vector2Subtract(circle.velocity,
                 Vector2Scale(normal, 2.0f * dotProduct));
 
-            // Добавляем затухание
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.velocity = Vector2Scale(circle.velocity, 0.9f);
 
-            // Немного отодвигаем круг от препятствия чтобы избежать залипания
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.position = Vector2Add(circle.position, Vector2Scale(normal, 2.0f));
         }
     }
 }
 
 bool CheckGoalLineCrossing(const Circle& circle, const Goal& goal) {
-    // Высота линии ворот (уровень перекладины)
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     float goalLineY = goal.position.y - goal.height / 2;
 
-    // Проверяем, пересек ли мяч линию ворот (с учетом радиуса)
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     if (circle.position.y - circle.radius <= goalLineY) {
-        // Проверяем, пролетел ли мяч между штангами
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float leftPostX = goal.position.x - goal.width / 2;
         float rightPostX = goal.position.x + goal.width / 2;
 
-        // Если мяч пересек линию и не попал между штангами
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (circle.position.x < leftPostX || circle.position.x > rightPostX) {
             return true;
         }
@@ -90,16 +90,16 @@ bool CheckGoalLineCrossing(const Circle& circle, const Goal& goal) {
 }
 
 bool CheckGreenLineTouch(const Circle& circle, const Goal& goal) {
-    // Высота зеленой линии (выше желтой на 50 пикселей)
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ 50 пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     float greenLineY = goal.position.y + goal.height / 2 - 50.0f;
 
-    // Проверяем, коснулся ли мяч зеленой линии
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (abs(circle.position.y - greenLineY) <= circle.radius) {
-        // Проверяем, находится ли мяч между штангами
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float leftPostX = goal.position.x - goal.width / 2;
         float rightPostX = goal.position.x + goal.width / 2;
 
-        // Если мяч коснулся зеленой линии и находится между штангами
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (circle.position.x >= leftPostX && circle.position.x <= rightPostX) {
             return true;
         }
@@ -108,16 +108,16 @@ bool CheckGreenLineTouch(const Circle& circle, const Goal& goal) {
 }
 
 bool CheckCompleteGoal(const Circle& circle, const Goal& goal) {
-    // Высота внутренней линии ворот (на уровне ника штанг)
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
     float innerLineY = goal.position.y + goal.height / 2;
 
-    // Проверяем, пересек ли мяч внутреннюю линию ворот
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (circle.position.y - circle.radius <= innerLineY) {
-        // Проверяем, пролетел ли мяч между штангами
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float leftPostX = goal.position.x - goal.width / 2;
         float rightPostX = goal.position.x + goal.width / 2;
 
-        // Если мяч пересек внутреннюю линию и попал между штангами
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (circle.position.x >= leftPostX && circle.position.x <= rightPostX) {
             return true;
         }
@@ -126,19 +126,19 @@ bool CheckCompleteGoal(const Circle& circle, const Goal& goal) {
 }
 
 bool CheckSideLinesCollision(const Circle& circle, const Goal& goal) {
-    // Высота линии (уровень низа штанг)
+    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
     float lineY = goal.position.y + goal.height / 2;
 
-    // Проверяем, находится ли мяч на уровне линии
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (abs(circle.position.y - lineY) <= circle.radius) {
-        // Левая ГОРИЗОНТАЛЬНАЯ белая линия СЛЕВА от левой штанги (прилегает к воротам)
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         float leftLineStartX = 0;
-        float leftLineEndX = goal.position.x - goal.width / 2; // Теперь прилегает к левой штанге
+        float leftLineEndX = goal.position.x - goal.width / 2; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (circle.position.x >= leftLineStartX && circle.position.x <= leftLineEndX) {
             return true;
         }
 
-        // Правая ГОРИЗОНТАЛЬНАЯ белая линия СПРАВА от правой штанги (прилегает к воротам)
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
         float rightLineStartX = goal.position.x + goal.width / 2;
         float rightLineEndX = MAX_WIDTH;
         if (circle.position.x >= rightLineStartX && circle.position.x <= rightLineEndX) {
@@ -151,57 +151,57 @@ bool CheckSideLinesCollision(const Circle& circle, const Goal& goal) {
 void MakeGoalkeeperJump(Goalkeeper& keeper) {
     if (!keeper.isJumping && keeper.playerControlled == 0) {
         keeper.isJumping = true;
-        keeper.jumpTimer = 0.5f; // Время прыжка в секундах
+        keeper.jumpTimer = 0.5f; // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-        // Случайное направление прычка (влево, вправо или по центру)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
         int direction = GetRandomValue(0, 2);
         switch (direction) {
-        case 0: // Прыжок влево
+        case 0: // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             keeper.jumpDirection = { -1.0f, 0.0f };
             break;
-        case 1: // Прыжок вправо
+        case 1: // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             keeper.jumpDirection = { 1.0f, 0.0f };
             break;
-        case 2: // Остаться по центру (небольшой прыжок на месте)
+        case 2: // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
             keeper.jumpDirection = { 0.0f, -0.5f };
             break;
         }
 
-        // Начальная скорость прыжка
-        keeper.velocity = Vector2Scale(keeper.jumpDirection, 200.0f); // Уменьшил скорость прыжка
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+        keeper.velocity = Vector2Scale(keeper.jumpDirection, 200.0f); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     }
 }
 
 void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
     if (keeper.playerControlled == 0) {
-        // AI вратарь
+        // AI пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (keeper.isJumping) {
-            // Обновляем таймер прыжка
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             keeper.jumpTimer -= deltaTime;
 
-            // Обновляем позицию
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
 
-            // Добавляем гравитацию
-            keeper.velocity.y += 400.0f * deltaTime; // Уменьшил гравитацию
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            keeper.velocity.y += 400.0f * deltaTime; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-            // ОГРАНИЧИВАЕМ ПОЗИЦИЮ ВРАТАРЯ В ПРЕДЕЛАх ВОРОТ (уже границы)
-            float goalLeft = keeper.startPosition.x - 50; // Левая граница ворот (уже)
-            float goalRight = keeper.startPosition.x + 50; // Правая граница ворот (уже)
-            float goalTop = keeper.startPosition.y - 20; // Верхняя граница
-            float goalBottom = keeper.startPosition.y + 20; // Нижняя граница
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+            float goalLeft = keeper.startPosition.x - 50; // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ)
+            float goalRight = keeper.startPosition.x + 50; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ)
+            float goalTop = keeper.startPosition.y - 20; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            float goalBottom = keeper.startPosition.y + 20; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-            // Ограничение по горизонтали
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (keeper.position.x < goalLeft) {
                 keeper.position.x = goalLeft;
-                keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
+                keeper.velocity.x = -keeper.velocity.x * 0.3f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             }
             if (keeper.position.x > goalRight) {
                 keeper.position.x = goalRight;
-                keeper.velocity.x = -keeper.velocity.x * 0.3f; // Сильнее гасим скорость
+                keeper.velocity.x = -keeper.velocity.x * 0.3f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            // Ограничение по вертикали
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (keeper.position.y < goalTop) {
                 keeper.position.y = goalTop;
                 keeper.velocity.y = -keeper.velocity.y * 0.3f;
@@ -211,13 +211,13 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
                 keeper.velocity.y = -keeper.velocity.y * 0.3f;
             }
 
-            // Завершение прыжка
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             if (keeper.jumpTimer <= 0) {
                 keeper.isJumping = false;
-                // Плавное возвращение на стартовую позицию
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 Vector2 direction = Vector2Subtract(keeper.startPosition, keeper.position);
-                if (Vector2Length(direction) > 2.0f) { // Более точное возвращение
-                    keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f); // Медленнее возвращение
+                if (Vector2Length(direction) > 2.0f) { // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 }
                 else {
                     keeper.velocity = { 0, 0 };
@@ -226,7 +226,7 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
             }
         }
         else {
-            // Плавное возвращение на стартовую позицию
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             Vector2 direction = Vector2Subtract(keeper.startPosition, keeper.position);
             if (Vector2Length(direction) > 2.0f) {
                 keeper.velocity = Vector2Scale(Vector2Normalize(direction), 150.0f);
@@ -239,10 +239,10 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
         }
     }
     else {
-        // Игрок управляет вратарем
+        // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Vector2 newVelocity = { 0, 0 };
 
-        // Управление стрелками
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (IsKeyDown(KEY_LEFT)) {
             newVelocity.x = -keeper.moveSpeed;
         }
@@ -256,17 +256,17 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
             newVelocity.y = keeper.moveSpeed;
         }
 
-        // Прыжок на пробел
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (IsKeyPressed(KEY_SPACE) && !keeper.isJumping) {
             keeper.isJumping = true;
             keeper.jumpTimer = 0.3f;
-            keeper.velocity.y = -300.0f; // Прыжок вверх
+            keeper.velocity.y = -300.0f; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         }
 
-        // Обновление прыжка
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (keeper.isJumping) {
             keeper.jumpTimer -= deltaTime;
-            keeper.velocity.y += 600.0f * deltaTime; // Гравитация
+            keeper.velocity.y += 600.0f * deltaTime; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
             if (keeper.jumpTimer <= 0 && keeper.position.y >= keeper.startPosition.y) {
                 keeper.isJumping = false;
@@ -275,15 +275,15 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
             }
         }
 
-        // Применяем скорость движения
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (!keeper.isJumping) {
             keeper.velocity = newVelocity;
         }
 
-        // Обновляем позицию
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         keeper.position = Vector2Add(keeper.position, Vector2Scale(keeper.velocity, deltaTime));
 
-        // Ограничиваем позицию вратаря в пределах ворот
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         float goalLeft = keeper.startPosition.x - 70;
         float goalRight = keeper.startPosition.x + 70;
         float goalTop = keeper.startPosition.y - 40;
@@ -295,47 +295,47 @@ void UpdateGoalkeeper(Goalkeeper& keeper, float deltaTime) {
         if (keeper.position.y > goalBottom) keeper.position.y = goalBottom;
     }
 
-    // Обновляем границы вратаря
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     keeper.bounds.x = keeper.position.x - keeper.width / 2;
     keeper.bounds.y = keeper.position.y - keeper.height / 2;
 }
 
-// ... остальные функции (ApplySpin, UpdateSpin, GenerateCircles и т.д.) которые мы уже добавили ранее
+// ... пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (ApplySpin, UpdateSpin, GenerateCircles пїЅ пїЅ.пїЅ.) пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
-// ... существующие функции до конца файла
+// ... пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
-// Добавляем недостающие функции:
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:
 
 void ApplySpin(Circle& circle, const Vector2& direction, bool spinActive[4]) {
-    // Сбрасываем все типы кручения
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     for (int i = 0; i < 4; i++) {
         circle.hasSpin[i] = false;
         circle.spinForce[i] = 0.0f;
     }
 
-    // Применяем активные типы кручения
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     for (int i = 0; i < 4; i++) {
         if (spinActive[i]) {
             circle.hasSpin[i] = true;
-            circle.spinForce[i] = 80.0f; // Сила для каждого типа
+            circle.spinForce[i] = 80.0f; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 
-            // Устанавливаем направление для каждого типа
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
             switch (i) {
-            case 0: // Кручение влево (против часовой стрелки)
+            case 0: // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
                 circle.spinDirection[i] = { direction.y, -direction.x };
                 break;
-            case 1: // Кручение вправо (по часовой стрелке)
+            case 1: // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
                 circle.spinDirection[i] = { -direction.y, direction.x };
                 break;
-            case 2: // Верхнее кручение (подкрутка вверх)
+            case 2: // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ)
                 circle.spinDirection[i] = { 0, -1 };
                 break;
-            case 3: // Нижнее кручение (подкрутка вниз)
+            case 3: // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ)
                 circle.spinDirection[i] = { 0, 1 };
                 break;
             }
 
-            // Нормализуем направление кручения
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.spinDirection[i] = Vector2Normalize(circle.spinDirection[i]);
         }
     }
@@ -344,11 +344,11 @@ void ApplySpin(Circle& circle, const Vector2& direction, bool spinActive[4]) {
 void UpdateSpin(Circle& circle, float deltaTime) {
     for (int i = 0; i < 4; i++) {
         if (circle.hasSpin[i] && circle.spinForce[i] > 0) {
-            // ПРИМЕНЯЕМ КРУЧЕНИЕ К СКОРОСТИ МЯЧА КАЖДЫЙ КАДР
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
             Vector2 spinEffect = Vector2Scale(circle.spinDirection[i], circle.spinForce[i] * deltaTime);
             circle.velocity = Vector2Add(circle.velocity, spinEffect);
 
-            // Постепенно уменьшаем силу кручения
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             circle.spinForce[i] -= 60.0f * deltaTime;
 
             if (circle.spinForce[i] <= 0) {
@@ -358,7 +358,7 @@ void UpdateSpin(Circle& circle, float deltaTime) {
         }
     }
 
-    // Визуальный эффект - рисуем маленькие частицы вокруг мяча для показа кручения
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     bool anySpinActive = false;
     for (int i = 0; i < 4; i++) {
         if (circle.hasSpin[i] && circle.spinForce[i] > 0) {
@@ -375,12 +375,12 @@ void UpdateSpin(Circle& circle, float deltaTime) {
                 circle.position.y + sinf(angle) * (circle.radius + 10)
             };
 
-            // Цвет частицы в зависимости от активных типов кручения
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             Color particleColor = WHITE;
-            if (circle.hasSpin[0] && circle.spinForce[0] > 0) particleColor = BLUE; // Влево
-            if (circle.hasSpin[1] && circle.spinForce[1] > 0) particleColor = RED;  // Вправо
-            if (circle.hasSpin[2] && circle.spinForce[2] > 0) particleColor = GREEN; // Вверх
-            if (circle.hasSpin[3] && circle.spinForce[3] > 0) particleColor = YELLOW; // Вниз
+            if (circle.hasSpin[0] && circle.spinForce[0] > 0) particleColor = BLUE; // пїЅпїЅпїЅпїЅпїЅ
+            if (circle.hasSpin[1] && circle.spinForce[1] > 0) particleColor = RED;  // пїЅпїЅпїЅпїЅпїЅпїЅ
+            if (circle.hasSpin[2] && circle.spinForce[2] > 0) particleColor = GREEN; // пїЅпїЅпїЅпїЅпїЅ
+            if (circle.hasSpin[3] && circle.spinForce[3] > 0) particleColor = YELLOW; // пїЅпїЅпїЅпїЅ
 
             DrawCircleV(particlePos, 3, particleColor);
         }
@@ -398,17 +398,17 @@ int GenerateCircles(std::vector<Circle>& circles, int count, float radius,
         Vector2 accelerate = { 0,0 };
         float weight = radius / 3;
 
-        // Позиция мяча в зависимости от режима
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         Vector2 position;
         if (mode == PENALTY) {
-            // Для пенальти - фиксированная позиция
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             position = {
                 MAX_WIDTH / 2.0f,
-                MAX_HEIGHT - 150.0f  // Фиксированная позиция для пенальти
+                MAX_HEIGHT - 150.0f  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             };
         }
         else {
-            // Для свободного удара - начальная позиция как раньше
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             position = {
                 MAX_WIDTH / 2.0f,
                 MAX_HEIGHT / 2.0f + 100
@@ -421,8 +421,8 @@ int GenerateCircles(std::vector<Circle>& circles, int count, float radius,
             newCircle.spinForce[j] = 0.0f;
             newCircle.spinDirection[j] = { 0, 0 };
         }
-        newCircle.controllingPlayer = 1; // По умолчанию управляет игрок 1
-        newCircle.canMoveFreely = (mode == FREE_KICK); // В свободном ударе можно перемещать мяч
+        newCircle.controllingPlayer = 1; // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 1
+        newCircle.canMoveFreely = (mode == FREE_KICK); // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
         circles.push_back(newCircle);
     }
     return count;
@@ -443,19 +443,19 @@ void StaticCollisionResolution(Circle& a, Circle& b) {
 void DynamicCollisionResolution(Circle& a, Circle& b) {
     Vector2 first = a.position;
     Vector2 second = b.position;
-    //оси столкновения - нормаль и касательная
+    //пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     Vector2 dir = Vector2Subtract(second, first);
     Vector2 normal = Vector2Normalize(dir);
     Vector2 tangent = { -normal.y,normal.x };
-    //Проекции на оси столкновения
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     float dpNormA = Vector2DotProduct(a.velocity, normal);
     float dpNormB = Vector2DotProduct(b.velocity, normal);
     float dpTangA = Vector2DotProduct(a.velocity, tangent);
     float dpTangB = Vector2DotProduct(b.velocity, tangent);
-    //Сохранение импульса в 1мерном пространстве
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 1пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     float p1 = (dpNormA * (a.weight - b.weight) + 2 * b.weight * dpNormB) / (a.weight + b.weight);
     float p2 = (dpNormB * (b.weight - a.weight) + 2 * a.weight * dpNormA) / (a.weight + b.weight);
-    //Применяем измененный импульс к скоростям кругов
+    //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     a.velocity = Vector2Add(Vector2Scale(tangent, dpTangA), Vector2Scale(normal, p1));
     b.velocity = Vector2Add(Vector2Scale(tangent, dpTangB), Vector2Scale(normal, p2));
 }
@@ -481,11 +481,11 @@ bool IsCircleOutOfBounds(const Circle& circle) {
 
 void ResetCircle(Circle& circle, GameMode mode) {
     if (mode == PENALTY) {
-        // В режиме пенальти всегда возвращаем на фиксированную позицию
+        // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         circle.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT - 150.0f };
     }
     else {
-        // В режиме свободного удара возвращаем на стартовую позицию
+        // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         circle.position = circle.startPosition;
     }
 
@@ -501,11 +501,11 @@ void ResetCircle(Circle& circle, GameMode mode) {
 
 void ResetToHitPosition(Circle& circle, GameMode mode) {
     if (mode == PENALTY) {
-        // В режиме пенальти всегда возвращаем на фиксированную позицию
+        // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         circle.position = { MAX_WIDTH / 2.0f, MAX_HEIGHT - 150.0f };
     }
     else {
-        // В режиме свободного удара возвращаем в точку удара
+        // пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         circle.position = circle.hitPosition;
     }
 
@@ -520,23 +520,23 @@ void ResetToHitPosition(Circle& circle, GameMode mode) {
 }
 
 void HandleWallCollision(Circle& circle) {
-    // Столкновение с левой стеной
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     if (circle.position.x - circle.radius < 0) {
         circle.position.x = circle.radius;
         circle.velocity.x = -circle.velocity.x * 0.9f;
     }
-    // Столкновение с правой стеной
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     else if (circle.position.x + circle.radius > MAX_WIDTH) {
         circle.position.x = MAX_WIDTH - circle.radius;
         circle.velocity.x = -circle.velocity.x * 0.9f;
     }
 
-    // Столкновение с верхней стеной
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     if (circle.position.y - circle.radius < 0) {
         circle.position.y = circle.radius;
         circle.velocity.y = -circle.velocity.y * 0.9f;
     }
-    // Столкновение с нижней стеной
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     else if (circle.position.y + circle.radius > MAX_HEIGHT) {
         circle.position.y = MAX_HEIGHT - circle.radius;
         circle.velocity.y = -circle.velocity.y * 0.9f;
@@ -548,10 +548,10 @@ void UpdateArrow(Arrow& arrow, const Circle& circle, const Vector2& mousePositio
         arrow.visible = true;
         arrow.position = circle.position;
 
-        // Вычисляем направление от мяча к курсору
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Vector2 direction = Vector2Subtract(mousePosition, circle.position);
 
-        // Ограничиваем максимальную длину стрелки
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float maxLength = 100.0f;
         float distance = Vector2Length(direction);
 
@@ -560,7 +560,7 @@ void UpdateArrow(Arrow& arrow, const Circle& circle, const Vector2& mousePositio
             arrow.length = (distance > maxLength) ? maxLength : distance;
             arrow.angle = atan2f(direction.y, direction.x);
 
-            // Определяем цвет стрелки в зависимости от силы
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
             float power = arrow.length / maxLength;
             if (power < 0.3f) arrow.color = GREEN;
             else if (power < 0.7f) arrow.color = YELLOW;

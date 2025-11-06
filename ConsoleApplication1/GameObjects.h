@@ -1,12 +1,12 @@
-#ifndef GAMEOBJECTS_H
+п»ї#ifndef GAMEOBJECTS_H
 #define GAMEOBJECTS_H
 
 #include "raylib.h"
 #include "raymath.h"
 #include <string>
-#include "Game.h"  // Добавляем для GameMode
+#include "Game.h"  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ GameMode
 
-// Структура для кнопки
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 struct Button {
     Rectangle bounds;
     const char* text;
@@ -14,17 +14,17 @@ struct Button {
     Color textColor;
 };
 
-// Структура для ворот
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 struct Goal {
-    Rectangle leftPost;   // Левая штанга
-    Rectangle rightPost;  // Правая штанга
-    Rectangle crossbar;   // Перекладина
-    float width;          // Ширина ворот
-    float height;         // Высота ворот
-    Vector2 position;     // Позиция ворот (центр)
+    Rectangle leftPost;   // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    Rectangle rightPost;  // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    Rectangle crossbar;   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    float width;          // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+    float height;         // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+    Vector2 position;     // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ)
 };
 
-// Структура для вратаря
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 struct Goalkeeper {
     Rectangle bounds;
     Vector2 position;
@@ -35,9 +35,9 @@ struct Goalkeeper {
     bool isJumping;
     float jumpTimer;
     Vector2 jumpDirection;
-    Texture2D texture;    // Текстура вратаря
-    int playerControlled; // 0 - AI, 1 - Игрок 1, 2 - Игрок 2
-    float moveSpeed;      // Скорость движения для игрока
+    Texture2D texture;    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    int playerControlled; // 0 - AI, 1 - пїЅпїЅпїЅпїЅпїЅ 1, 2 - пїЅпїЅпїЅпїЅпїЅ 2
+    float moveSpeed;      // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 };
 
 struct Circle {
@@ -46,16 +46,16 @@ struct Circle {
     Vector2 accelerate;
     float radius;
     float weight;
-    Vector2 startPosition; // Начальная позиция для возврата
-    Vector2 hitPosition;   // Позиция удара для возврата при промахе
-    bool hasSpin[4];       // Типы кручения: 0=влево, 1=вправо, 2=вверх, 3=вниз
-    float spinForce[4];    // Сила каждого типа кручения
-    Vector2 spinDirection[4]; // Направление каждого типа кручения
-    int controllingPlayer; // Какой игрок управляет мячом (1 или 2)
-    bool canMoveFreely;    // Может ли мяч свободно перемещаться
+    Vector2 startPosition; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    Vector2 hitPosition;   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    bool hasSpin[4];       // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: 0=пїЅпїЅпїЅпїЅпїЅ, 1=пїЅпїЅпїЅпїЅпїЅпїЅ, 2=пїЅпїЅпїЅпїЅпїЅ, 3=пїЅпїЅпїЅпїЅ
+    float spinForce[4];    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    Vector2 spinDirection[4]; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    int controllingPlayer; // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (1 пїЅпїЅпїЅ 2)
+    bool canMoveFreely;    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 };
 
-// Структура для стрелки направления удара
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 struct Arrow {
     Vector2 position;
     Vector2 direction;
@@ -65,7 +65,7 @@ struct Arrow {
     bool visible;
 };
 
-// Функции для создания объектов
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 Button CreateButton(float x, float y, float width, float height, const char* text, Color color, Color textColor);
 Goal CreateGoal(float width, float height, Vector2 position);
 Goalkeeper CreateGoalkeeper(float width, float height, Vector2 position, const char* texturePath, int playerControlled = 0);
