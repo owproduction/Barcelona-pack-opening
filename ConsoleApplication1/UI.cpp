@@ -389,26 +389,11 @@ void DrawSelectedPlayerInfo() {
         DrawRectangle(MAX_WIDTH / 2 - 150, yPos - 10, 300, 50, Fade(BLACK, 0.5f));
         DrawRectangleLines(MAX_WIDTH / 2 - 150, yPos - 10, 300, 50, WHITE);
 
-        // Текстура игрока (маленькая)
-        if (selectedPlayer->texture.id != 0) {
-            Rectangle playerRect = { MAX_WIDTH / 2 - 140, yPos, 40, 40 };
-            DrawTexturePro(selectedPlayer->texture,
-                { 0, 0, (float)selectedPlayer->texture.width, (float)selectedPlayer->texture.height },
-                playerRect, { 0, 0 }, 0, WHITE);
-        }
-
         // Имя игрока и бонус
         DrawText(selectedPlayer->name.c_str(), MAX_WIDTH / 2 - 90, yPos + 5, 20, WHITE);
         DrawText(TextFormat("+%.0f%% POWER", (selectedPlayer->powerBonus - 1.0f) * 100),
             MAX_WIDTH / 2 - 90, yPos + 25, 15, YELLOW);
-
-        // Текстура мяча игрока
-        if (currentBallTexture.id != 0) {
-            Rectangle ballRect = { MAX_WIDTH / 2 + 100, yPos + 5, 30, 30 };
-            DrawTexturePro(currentBallTexture,
-                { 0, 0, (float)currentBallTexture.width, (float)currentBallTexture.height },
-                ballRect, { 15, 15 }, 0, WHITE);
-        }
+        
     }
     else {
         // Если игрок не выбран

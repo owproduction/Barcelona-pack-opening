@@ -67,6 +67,12 @@ int main()
     // Загружаем футболистов
     LoadFootballers();
 
+    // Загружаем GIF анимацию удара
+    if (!LoadGifAnimation(kickGifAnimation, "kick.gif", 0.06f)) {
+        TraceLog(LOG_WARNING, "Failed to load kick animation");
+    }
+    kickGifAnimation.scale = 0.7f;
+
     // Загружаем сохраненный прогресс
     LoadProgress();
 
@@ -281,6 +287,11 @@ int main()
                     // УВЕЛИЧИВАЕМ СИЛУ УДАРА
                     float powerMultiplier = 0.25f;
 
+                    // ПРИМЕНЯЕМ БОНУС СИЛЫ ОТ ВЫБРАННОГО ИГРОКА
+                    if (selectedPlayer != nullptr) {
+                        powerMultiplier *= playerPowerBonus;
+                    }
+
                     // ПРИМЕНЯЕМ СИЛУ БЕЗ ИЗМЕНЕНИЙ В РЕЖИМЕ СЛОУМО
                     Vector2 acceleration = Vector2Scale(direction, power * 150.0f * powerMultiplier);
 
@@ -298,6 +309,9 @@ int main()
                     if (anySpinActive) {
                         ApplySpin(*selectedCircle, direction, spinActive);
                     }
+
+                    // ЗАПУСКАЕМ GIF АНИМАЦИЮ УДАРА
+                    StartKickAnimation(selectedCircle->position.x, selectedCircle->position.y);
 
                     // Вратарь прыгает при ударе (только если AI)
                     if (goalkeeper.playerControlled == 0) {
@@ -363,15 +377,6 @@ int main()
                 if (currentGameMode == PENALTY && !circle.canMoveFreely && Vector2Length(circle.velocity) < 10.0f) {
                     ResetCircle(circle, currentGameMode);
                 }
-                DrawText("A/LEFT - Left Spin", 10, MAX_HEIGHT - 140, 15, spinActive[0] ? BLUE : WHITE);
-                DrawText("D/RIGHT - Right Spin", 10, MAX_HEIGHT - 120, 15, spinActive[1] ? RED : WHITE);
-                DrawText("W/UP - Top Spin", 10, MAX_HEIGHT - 100, 15, spinActive[2] ? GREEN : WHITE);
-                DrawText("S/DOWN - Back Spin", 10, MAX_HEIGHT - 80, 15, spinActive[3] ? YELLOW : WHITE);
-                DrawText("SPACE - Slow Motion", 10, MAX_HEIGHT - 60, 15, slowMoActive ? ORANGE : WHITE);
-                DrawText("H - Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
-
-                // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
-                DrawSelectedPlayerInfo();
             }
         }
         break;
@@ -403,25 +408,6 @@ int main()
                 }
             }
 
-            // Отображаем управление
-            DrawText("PLAYER 1 (Shooter):", 10, MAX_HEIGHT - 160, 15, BLUE);
-            DrawText("WASD - Spin, Mouse - Aim/Shoot", 10, MAX_HEIGHT - 140, 15, BLUE);
-
-            if (goalkeeperController == 1) {
-                DrawText("PLAYER 1 (Goalkeeper):", 10, MAX_HEIGHT - 110, 15, BLUE);
-                DrawText("Arrows - Move, SPACE - Jump", 10, MAX_HEIGHT - 90, 15, BLUE);
-            }
-            else {
-                DrawText("PLAYER 2 (Goalkeeper):", MAX_WIDTH - 200, MAX_HEIGHT - 110, 15, RED);
-                DrawText("Arrows - Move, SPACE - Jump", MAX_WIDTH - 200, MAX_HEIGHT - 90, 15, RED);
-            }
-
-            DrawText("H - Back to Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
-
-            // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
-            DrawSelectedPlayerInfo();
-
-
             // Обновляем стрелку направления
             if (dragging && selectedCircle != nullptr) {
                 UpdateArrow(arrow, *selectedCircle, mousePosition, dragging);
@@ -450,6 +436,12 @@ int main()
                     float power = arrow.length / 100.0f; // Нормализуем силу
 
                     float powerMultiplier = 0.25f;
+
+                    // ПРИМЕНЯЕМ БОНУС СИЛЫ ОТ ВЫБРАННОГО ИГРОКА
+                    if (selectedPlayer != nullptr) {
+                        powerMultiplier *= playerPowerBonus;
+                    }
+
                     Vector2 acceleration = Vector2Scale(direction, power * 150.0f * powerMultiplier);
 
                     selectedCircle->velocity = acceleration;
@@ -466,6 +458,9 @@ int main()
                     if (anySpinActive) {
                         ApplySpin(*selectedCircle, direction, spinActive);
                     }
+
+                    // ЗАПУСКАЕМ GIF АНИМАЦИЮ УДАРА
+                    StartKickAnimation(selectedCircle->position.x, selectedCircle->position.y);
 
                     // В режиме пенальти после удара мяч нельзя больше перемещать
                     if (currentGameMode == PENALTY) {
@@ -603,7 +598,10 @@ int main()
             // Рисуем вратаря (PNG текстура)
             DrawGoalkeeper(goalkeeper);
 
-            // Рисуем мячи с текстурами
+            // Рисуем GIF анимацию удара (ПОД мячом)
+            DrawGifAnimation(kickGifAnimation);
+
+            // Рисуем мячи с текстурами (ПОВЕРХ анимации)
             for (const auto& circle : circles) {
                 DrawBall(circle);
             }
@@ -628,6 +626,14 @@ int main()
             // Отображаем количество монеток (просто текст)
             DrawText(TextFormat("Coins: %d", coins), 10, 40, 20, GOLD);
 
+            // Отображаем выбранного игрока
+            if (selectedPlayer != nullptr) {
+                DrawText(TextFormat("Player: %s (+%.0f%%)",
+                    selectedPlayer->name.c_str(),
+                    (playerPowerBonus - 1.0f) * 100),
+                    10, 70, 15, GREEN);
+            }
+
             // Подсказка управления
             DrawText("A/LEFT - Left Spin", 10, MAX_HEIGHT - 140, 15, spinActive[0] ? BLUE : WHITE);
             DrawText("D/RIGHT - Right Spin", 10, MAX_HEIGHT - 120, 15, spinActive[1] ? RED : WHITE);
@@ -635,6 +641,9 @@ int main()
             DrawText("S/DOWN - Back Spin", 10, MAX_HEIGHT - 80, 15, spinActive[3] ? YELLOW : WHITE);
             DrawText("SPACE - Slow Motion", 10, MAX_HEIGHT - 60, 15, slowMoActive ? ORANGE : WHITE);
             DrawText("H - Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
+
+            // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
+            DrawSelectedPlayerInfo();
 
             // Подсказка для сброса прогресса
             DrawText("Shift+R - Reset Progress", MAX_WIDTH - 200, MAX_HEIGHT - 20, 15, GRAY);
@@ -673,9 +682,12 @@ int main()
             // Рисуем вратаря (PNG текстура)
             DrawGoalkeeper(goalkeeper);
 
-            // Рисуем круги
+            // Рисуем GIF анимацию удара (ПОД мячом)
+            DrawGifAnimation(kickGifAnimation);
+
+            // Рисуем мячи с текстурами (ПОВЕРХ анимации)
             for (const auto& circle : circles) {
-                DrawCircleV(circle.position, circle.radius, WHITE);
+                DrawBall(circle);
             }
 
             // Рисуем стрелку направления удара
@@ -709,6 +721,9 @@ int main()
             }
 
             DrawText("H - Back to Menu", 10, MAX_HEIGHT - 40, 15, WHITE);
+
+            // ОТОБРАЖЕНИЕ ВЫБРАННОГО ИГРОКА ВНИЗУ ЭКРАНА
+            DrawSelectedPlayerInfo();
         }
         break;
 
@@ -755,6 +770,9 @@ int main()
             UnloadTexture(footballer.texture);
         }
     }
+
+    // Освобождаем GIF анимацию
+    UnloadGifAnimation(kickGifAnimation);
 
     CloseWindow();
     return 0;
