@@ -23,8 +23,6 @@ void StartPackAnimation(Texture2D playerTexture, const std::string& playerName) 
     packAnimation.showSkipButton = false;
 }
 
-
-
 void DrawAnimations() {
     // ��������� �������� ����
     if (goalAnimation.active) {
@@ -60,6 +58,7 @@ void DrawAnimations() {
     }
     DrawGifAnimation(kickGifAnimation);
 }
+
 void UpdateGifAnimation(GifAnimation& anim, float deltaTime) {
     if (!anim.active || anim.gifImage.data == NULL) return;
 
@@ -98,6 +97,7 @@ bool LoadGifAnimation(GifAnimation& anim, const char* gifPath, float frameDelay)
     // Загружаем GIF анимацию
     anim.gifImage = LoadImageAnim(gifPath, &anim.totalFrames);
 
+
     if (anim.gifImage.data != NULL) {
         // Создаем текстуру из первого кадра
         anim.texture = LoadTextureFromImage(anim.gifImage);
@@ -106,11 +106,11 @@ bool LoadGifAnimation(GifAnimation& anim, const char* gifPath, float frameDelay)
         anim.frameTimer = 0;
         anim.currentFrame = 0;
         anim.nextFrameDataOffset = 0;
-        anim.scale = 1.0f;
+        anim.scale = 0.5f; 
         anim.active = false;
 
-        TraceLog(LOG_INFO, "GIF loaded: %s, frames: %d, size: %dx%d",
-            gifPath, anim.totalFrames, anim.gifImage.width, anim.gifImage.height);
+        TraceLog(LOG_INFO, "GIF loaded: %s, frames: %d, size: %dx%d, scale: %.2f",
+            gifPath, anim.totalFrames, anim.gifImage.width, anim.gifImage.height, anim.scale);
         return true;
     }
     else {
@@ -162,7 +162,6 @@ void UpdateAnimations(float deltaTime) {
     UpdateGifAnimation(kickGifAnimation, deltaTime);
 }
 
-
 void DrawGifAnimation(const GifAnimation& anim) {
     if (!anim.active || anim.texture.id == 0) return;
 
@@ -198,7 +197,7 @@ void StartKickAnimation(float ballX, float ballY) {
         if (!LoadGifAnimation(kickGifAnimation, "resources/kick.gif", 0.06f)) {
             return; // Если не удалось загрузить, выходим
         }
-        kickGifAnimation.scale = 0.7f;
+        kickGifAnimation.scale = 0.5f; // Уменьшенный масштаб для размера ~200x200
     }
 
     StartGifAnimation(kickGifAnimation, ballX, ballY + 40, false);
