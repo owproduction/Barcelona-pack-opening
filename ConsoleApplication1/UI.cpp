@@ -42,22 +42,20 @@ void DrawGoalkeeper(const Goalkeeper& keeper) {
 
 void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDragging, bool spinActive[4]) {
     if (isDragging) {
-        // ��������� ���������� ����� ����� � ��������
+        
         float distance = Vector2Distance(circle.position, mousePosition);
 
-        // ������������ ������������ ��������� ��� �������� ����
+        
         float maxDistance = 150.0f;
         float power = (distance > maxDistance) ? 1.0f : distance / maxDistance;
 
-        // ������� ����� (��� �����)
+        
         Vector2 barPosition = { circle.position.x - 50, circle.position.y - 40 };
         float barWidth = 100.0f;
         float barHeight = 10.0f;
 
-        // ������ ��� �����
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth, barHeight }, GRAY);
 
-        // ���������� ���� � ��� ����� �� ������ �������� ��������
         Color fillColor = WHITE;
         std::string shotType = "NORMAL SHOT";
 
@@ -77,13 +75,12 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
             shotType = "COMBO SPIN";
         }
 
-        // ������ ���������� ����� (���� ������� �� ���� �����)
+      
         DrawRectangleRec({ barPosition.x, barPosition.y, barWidth * power, barHeight }, fillColor);
 
-        // ������ ������ �����
         DrawRectangleLines(barPosition.x, barPosition.y, barWidth, barHeight, WHITE);
 
-        // ���������� ��� �����
+     
         DrawText(shotType.c_str(), barPosition.x, barPosition.y - 20, 15, fillColor);
     }
 }
@@ -91,7 +88,6 @@ void DrawPowerBar(const Circle& circle, const Vector2& mousePosition, bool isDra
 void DrawArrow(const Arrow& arrow) {
     if (!arrow.visible || arrow.length <= 0) return;
 
-    // ������ ����� �������
     Vector2 endPoint = {
         arrow.position.x + cosf(arrow.angle) * arrow.length,
         arrow.position.y + sinf(arrow.angle) * arrow.length
@@ -170,7 +166,7 @@ void DrawPackAnimationScreen(Texture2D playerTexture, const std::string& playerN
 
 void DrawMainMenu(Button playButton, Button twoPlayersButton, Button shopButton, Button collectionButton, Button exitButton) {
     // ���������
-    DrawText("FOOTBALL GAME", MAX_WIDTH / 2 - MeasureText("FOOTBALL GAME", 40) / 2, 100, 40, WHITE);
+    DrawText("ELEVEN METERS", MAX_WIDTH / 2 - MeasureText("ELEVEN METERS", 40) / 2, 100, 40, WHITE);
 
     // ���������� ���������� �������
     DrawText(TextFormat("Coins: %d", coins), MAX_WIDTH / 2 - MeasureText(TextFormat("Coins: %d", coins), 30) / 2, 160, 30, GOLD);

@@ -15,8 +15,9 @@ Footballer* selectedPlayer = nullptr;
 float playerPowerBonus = 1.0f;
 Texture2D currentBallTexture = { 0 };
 
+
 void LoadFootballers() {
-    // Загружаем 15 футболистов с разными индивидуальными бонусами
+
     Footballer player1 = {
         LoadTexture("player1.png"), "Messi", false, 1.3f, // +30%
         LoadTexture("ball_messi.png")
@@ -65,21 +66,9 @@ void LoadFootballers() {
         LoadTexture("player12.png"), "Van Dijk", false, 1.05f, // +5%
         LoadTexture("ball_vandijk.png")
     };
-    Footballer player13 = {
-        LoadTexture("player13.png"), "Courtois", false, 1.0f, // +0%
-        LoadTexture("ball_courtois.png")
-    };
-    Footballer player14 = {
-        LoadTexture("player14.png"), "Son", false, 1.0f, // +0%
-        LoadTexture("ball_son.png")
-    };
-    Footballer player15 = {
-        LoadTexture("player15.png"), "Pedri", false, 1.0f, // +0%
-        LoadTexture("ball_pedri.png")
-    };
-
+    
     footballers = { player1, player2, player3, player4, player5, player6, player7, player8,
-                   player9, player10, player11, player12, player13, player14, player15 };
+                   player9, player10, player11, player12 }; 
 
     // Устанавливаем текстуру мяча по умолчанию
     currentBallTexture = LoadTexture("ball.png");

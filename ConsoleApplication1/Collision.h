@@ -3,10 +3,10 @@
 
 #include "raylib.h"
 #include "GameObjects.h"
-#include "Game.h"  // ��������� ��� GameMode, MAX_WIDTH, MAX_HEIGHT
+#include "Game.h"  
 #include <vector>
 
-// ������� ������������
+
 bool CheckGoalCollision(const Circle& circle, const Goal& goal, Vector2& normal);
 bool CheckGoalkeeperCollision(const Circle& circle, const Goalkeeper& keeper);
 void HandleGoalkeeperCollision(Circle& circle, Goalkeeper& keeper);
